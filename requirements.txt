@@ -1,0 +1,6 @@
+ipynb
+psycopg2
+pandas
+numpy
+supabase
+dotenv

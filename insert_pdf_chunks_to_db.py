@@ -1,4 +1,5 @@
 import os
+from dotenv import load_dotenv 
 import json
 import fitz  # PyMuPDF
 import psycopg2
@@ -7,6 +8,8 @@ from bs4 import BeautifulSoup
 from psycopg2.extras import execute_values
 from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+
+load_dotenv()
 
 def chunk_pdf(pdf_path: str) -> list[Document]:
     """
@@ -37,7 +40,7 @@ def chunk_pdf(pdf_path: str) -> list[Document]:
 
     # 4. Add metadata to each chunk
     for i, chunk in enumerate(chunks):
-        chunk.metadata["source"] = pdf_path
+        chunk.metadata["source"] = os.path.basename(pdf_path)
         chunk.metadata["chunk_number"] = i + 1
 
     return chunks
@@ -63,21 +66,27 @@ def insert_chunk_to_db(pdf_path: str, db_url: str):
     try:
         with psycopg2.connect(db_url) as conn:
             with conn.cursor() as cur:
-                # Define the INSERT statement
                 query = "INSERT INTO rag_text_chunks (metadata, source, chunk_number, content) VALUES %s"
-
-                # Execute the batch insert
                 execute_values(cur, query, data_to_insert)
             
-            print(f"Successfully inserted {len(data_to_insert)} chunks from {os.path.basename(pdf_path)}.")
+            # Explicitly commit the transaction
+            conn.commit()
+            
+            # Only print success AFTER the commit is successful
+            print(f"Successfully committed {len(data_to_insert)} chunks from {os.path.basename(pdf_path)}.")
 
     except psycopg2.Error as e:
-        print(f"Database error: {e}")
+        # We add a clearer error message here
+        print(f"Database error for {os.path.basename(pdf_path)}: {e}")
+        # Rollback the transaction on error
+        if 'conn' in locals() and conn:
+            conn.rollback()
 
 if __name__ == "__main__":
     pdf_directory = "pdf"
     pdf_path = "pdf/5-action-steps-help-someone-having-thoughts-suicide.pdf"
     db_url = os.getenv('DATABASE_URL')
+    print(db_url)
     
     if not db_url:
         print("Error: DATABASE_URL environment variable not set.")

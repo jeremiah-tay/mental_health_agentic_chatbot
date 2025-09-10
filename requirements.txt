@@ -15,3 +15,5 @@ Pillow
 beautifulsoup4
 requests
 PyPDF2
+openai
+tqdm

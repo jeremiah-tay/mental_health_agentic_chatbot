@@ -15,3 +15,7 @@ Pillow
 beautifulsoup4
 requests
 PyPDF2
+fastapi
+uvicorn[standard]
+openai
+tqdm

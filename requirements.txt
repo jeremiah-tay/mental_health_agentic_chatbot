@@ -15,8 +15,14 @@ Pillow
 beautifulsoup4
 requests
 PyPDF2
+tqdm
+fastapi
+uvicorn[standard]
+sentence_transformers
+chromadb
+unstructured
+faiss-cpu
 openai
 tqdm
 fastapi
 uvicorn[standard]
-

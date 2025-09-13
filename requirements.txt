@@ -15,3 +15,7 @@ Pillow
 beautifulsoup4
 requests
 PyPDF2
+sentence_transformers
+chromadb
+unstructured
+faiss-cpu

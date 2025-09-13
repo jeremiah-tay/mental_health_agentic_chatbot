@@ -22,3 +22,7 @@ sentence_transformers
 chromadb
 unstructured
 faiss-cpu
+openai
+tqdm
+fastapi
+uvicorn[standard]

@@ -15,6 +15,9 @@ Pillow
 beautifulsoup4
 requests
 PyPDF2
+tqdm
+fastapi
+uvicorn[standard]
 sentence_transformers
 chromadb
 unstructured

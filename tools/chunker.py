@@ -1,12 +1,7 @@
-def chunk_text(text, max_chars=2000):
-    paragraphs = [p.strip() for p in text.split("\n\n") if p.strip()]
+def chunk_text(text: str, max_words: int = 150):
+    words = text.split()
     out = []
-    cur = ""
-    for p in paragraphs:
-        if len(cur) + len(p) + 2 <= max_chars:
-            cur = (cur + "\n\n" + p).strip()
-        else:
-            if cur: out.append(cur)
-            cur = p
-    if cur: out.append(cur)
+    for i in range(0, len(words), max_words):
+        chunk = " ".join(words[i:i+max_words])
+        out.append(chunk)
     return out

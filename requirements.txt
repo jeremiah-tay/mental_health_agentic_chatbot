@@ -21,4 +21,6 @@ uvicorn[standard]
 sentence_transformers
 chromadb
 unstructured
+langgrah
+langchain-groq
 faiss-cpu

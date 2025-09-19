@@ -24,3 +24,8 @@ unstructured
 langgrah
 langchain-groq
 faiss-cpu
+faiss-cpu
+openai
+tqdm
+fastapi
+uvicorn[standard]

@@ -6,6 +6,13 @@ __pycache__/
 # C extensions
 *.so
 
+# Ignore the Python virtual environment
+chatbot_proj/
+
+# Ignore macOS system files
+.DS_Store
+
+
 # Distribution / packaging
 .Python
 build/

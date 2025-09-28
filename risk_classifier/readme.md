@@ -1,1 +1,1 @@
-This folder contains documents relating to the risk classifier
+This folder contains all documents relating to the risk classifier

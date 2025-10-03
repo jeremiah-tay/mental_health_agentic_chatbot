@@ -24,3 +24,11 @@ tqdm
 transformers
 unstructured
 uvicorn[standard]
+fastmcp>=2.0.0
+google-auth
+google-auth-oauthlib
+google-auth-httplib2
+google-api-python-client
+langgraph
+langchain-openai
+streamlit

@@ -29,14 +29,12 @@ app = create_supervisor_graph(llm)
 
 # --- 3. Streamlit User Interface ---
 if __name__ == "__main__":
-    st.title('Multi-Agent Mental Health Assistant')
+    st.title('Multi-Agent Mental Health Chatbot')
 
     # Initialize session state for messages if it doesn't exist
     if "messages" not in st.session_state:
-        # Start the conversation by invoking the graph's start node
-        # We pass an empty state to trigger the welcome message.
-        initial_state = app.invoke({})
-        st.session_state.messages = initial_state.get('messages', [])
+        # Just add the welcome message directly, don't invoke the graph
+        st.session_state.messages = [AIMessage(content="Hello! I'm your mental health assistant. I can help you find resources or book appointments. How may I help you today?")]
     
     # Display all chat messages from the history
     for msg in st.session_state.messages:

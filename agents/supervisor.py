@@ -19,10 +19,7 @@ load_dotenv()
 
 # Import your actual calendar tools
 from tools.calendar_tools import (
-    list_calendar_list,
-    list_calendar_events,
-    insert_calendar_event,
-    create_calendar
+    list_calendars, list_events, insert_event, test_calendar_connection
 )
 
 # Import the booking agent
@@ -41,7 +38,7 @@ def guidance_tool(query: str) -> str:
     print(f"--- SUPERVISOR: Calling Guidance Tool with query: '{query}' ---")
     return "A recommended CBT technique for this situation is 'Cognitive Restructuring'."
 
-llm = ChatOpenAI(model="gpt-4o-mini", api_key=os.getenv("OPENAI_API_KEY"), temperature=0.2)
+llm = ChatOpenAI(model="gpt-5-mini", api_key=os.getenv("OPENAI_API_KEY"), temperature=0.2)
 
 class SupervisorState(TypedDict):
     """

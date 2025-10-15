@@ -2,7 +2,7 @@
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from .utils.supabase_client import get_supabase
+from backend.utils.supabase_client import query_pgvector, client as openai_client
 from openai import OpenAI
 import os
 from typing import List
@@ -131,4 +131,57 @@ async def upload_pdf(request: Request, file: UploadFile = File(...), source: str
         raise HTTPException(status_code=500, detail=str(insert_res.error))
 
     return {"inserted": len(rows), "source": source}
+
+#################################################################################
+# --- Chat endpoint (PGVector as sub-agent) ---
+class ChatRequest(BaseModel):
+    message: str
+    k: int = 5
+
+
+@app.post("/chat")
+def chat_with_pgvector(payload: ChatRequest):
+    if not payload.message:
+        raise HTTPException(status_code=400, detail="message is required")
+
+    # 1) Embed user query
+    try:
+        embedding_res = openai.embeddings.create(
+            model=OPENAI_MODEL,
+            input=payload.message
+        )
+        query_emb = embedding_res.data[0].embedding
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"embedding generation failed: {e}")
+
+    # 2) Retrieve from Supabase (PGVector sub-agent)
+    try:
+        rpc_res = supabase.rpc(
+            "match_documents",
+            {"query_embedding": query_emb, "match_limit": payload.k}
+        ).execute()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"supabase rpc call failed: {e}")
+
+    if rpc_res.error:
+        raise HTTPException(status_code=500, detail=str(rpc_res.error))
+
+    docs = rpc_res.data
+    context_text = "\n\n".join([doc["content"] for doc in docs])
+
+    # 3) Use GPT to answer with context
+    try:
+        completion = openai.chat.completions.create(
+            model="gpt-4o-mini",  # or "gpt-4o"
+            messages=[
+                {"role": "system", "content": "You are a mental health assistant. Use retrieved context to answer."},
+                {"role": "user", "content": f"Context:\n{context_text}\n\nQuestion: {payload.message}"}
+            ]
+        )
+        answer = completion.choices[0].message.content
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"chat completion failed: {e}")
+
+    return {"answer": answer, "sources": docs}
+
 

@@ -10,20 +10,20 @@ from langchain_core.tools import tool
 from pydantic.v1 import BaseModel, Field
 from dotenv import load_dotenv
 
-# --- Environment Setup ---
+# --- env setup ---
 load_dotenv()
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 os.environ["GROQ_API_KEY"] = GROQ_API_KEY
 
-# --- Initialize Clients ---
+# --- initialize client ---
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 groq_client = Groq(api_key=GROQ_API_KEY)
 
 print("Supabase and Groq clients initialized")
 
-# --- CBT Technique Setup ---
+# --- cbt technique setup ---
 class CBTTechnique(Enum):
     COGNITIVE_RESTRUCTURING = "cognitive_restructuring"
     BEHAVIORAL_ACTIVATION = "behavioral_activation"
@@ -83,8 +83,7 @@ SAFE_FALLBACK_TECHNIQUES = [
 
 print(f"Loaded {len(TECHNIQUE_PROFILES)} CBT technique profiles from Supabase")
 
-# --- Load Embedding Model ---
-print("Loading embedding model...")
+# --- load embedding model ---
 embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
 
 technique_embeddings = {}
@@ -95,7 +94,7 @@ for technique, profile in TECHNIQUE_PROFILES.items():
 
 print(f"Embedding model loaded and {len(technique_embeddings)} technique embeddings computed")
 
-# --- Embedding-based Technique Selection ---
+# --- embedding-based technique selection ---
 def select_technique_by_embedding(user_input: str, top_k: int = 3) -> List[Tuple[CBTTechnique, float]]:
     """
     select cbt techniques using semantic similarity
@@ -119,7 +118,7 @@ def select_technique_by_embedding(user_input: str, top_k: int = 3) -> List[Tuple
     
     return sorted_techniques
 
-# --- LLM-based Technique Validation ---
+# --- llm-based technique validation ---
 def validate_technique_with_llm(user_input: str, technique: CBTTechnique) -> Tuple[bool, str]:
     """
     use llm to validate if selected technique is appropriate
@@ -262,7 +261,7 @@ now evaluate the user concern above."""
     except Exception as e:
         return False, f"validation error: {str(e)}"
 
-# --- Fallback Selection Helpers ---
+# --- fallback selection helpers ---
 def choose_best_fallback_forced(user_input: str, fallback_techniques: List[CBTTechnique]) -> CBTTechnique:
     """
     use llm to choose the most suitable fallback when all options were rejected
@@ -397,7 +396,7 @@ def choose_best_fallback_approved(user_input: str, approved_fallbacks: List[Dict
         for fb in approved_fallbacks
     ])
     
-    selection_prompt = f"""You are a licensed clinical psychologist specializing in Cognitive Behavioral Therapy (CBT). multiple safe fallback techniques have been validated as appropriate for this user's concern. you must now select the MOST appropriate option.
+    selection_prompt = f"""You are a licensed clinical psychologist specializing in Cognitive Behavioral Therapy (CBT). Multiple safe fallback techniques have been validated as appropriate for this user's concern. You must now select the MOST appropriate option.
 
 === SITUATION ===
 user concern: "{user_input}"
@@ -406,9 +405,9 @@ user concern: "{user_input}"
 {options_text}
 
 === SELECTION TASK ===
-both techniques are clinically appropriate (they passed validation), but you must select the one that is the BEST FIT for this specific situation.
+Both techniques are clinically appropriate (they passed validation), but you must select the one that is the BEST FIT for this specific situation.
 
-consider these factors in priority order:
+Consider these factors in priority order:
 
 1. TEMPORAL MATCH (most important):
    - is the user's concern acute (happening now) or chronic (ongoing pattern)?
@@ -428,12 +427,12 @@ consider these factors in priority order:
    chronic markers: "always", "keep", "constantly", "every time", "never stops" → mindfulness
 
 === DECISION FRAMEWORK ===
-ask yourself:
+Ask yourself:
 - which technique better matches the temporal quality of the user's concern?
 - which technique addresses the intensity level described?
 - which technique meets the implied need (immediate vs long-term)?
 
-select the technique that has the strongest match across these dimensions.
+Select the technique that has the strongest match across these dimensions.
 
 === RESPONSE FORMAT ===
 respond in this exact format:
@@ -484,11 +483,11 @@ now evaluate the user concern above and select the most appropriate technique fr
     except Exception as e:
         return CBTTechnique(approved_fallbacks[0]['technique'])
 
-# --- Pydantic Model for Tool Input ---
+# --- pydantic model for tool input ---
 class SelectCBTTechniqueArgs(BaseModel):
     user_mental_health_concern: str = Field(..., description="The user's mental health concern that needs CBT technique selection")
 
-# --- CBT Technique Selection Tool ---
+# --- cbt technique selection tool ---
 @tool("select_cbt_technique", args_schema=SelectCBTTechniqueArgs)
 def select_cbt_technique(user_mental_health_concern: str) -> dict:
     """
@@ -578,4 +577,4 @@ def select_cbt_technique(user_mental_health_concern: str) -> dict:
         "validation_attempts": validation_attempts
     }
 
-print("CBT technique selection tool initialized and ready for import")
+print("CBT technique selection tool initialized")

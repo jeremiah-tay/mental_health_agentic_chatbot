@@ -491,20 +491,126 @@ class SelectCBTTechniqueArgs(BaseModel):
 @tool("select_cbt_technique", args_schema=SelectCBTTechniqueArgs)
 def select_cbt_technique(user_mental_health_concern: str) -> dict:
     """
-    selects the most appropriate cbt technique for a user's mental health concern.
+    selects the most clinically appropriate CBT technique for a user's mental health concern through semantic analysis and expert validation.
     
-    use this tool ONLY when ALL of these conditions are met:
-    1. user is expressing a mental health concern (anxiety, depression, stress, negative thoughts, panic, worry, overwhelm, low mood, procrastination, etc.)
-    2. the concern is appropriate for brief cbt intervention (NOT crisis, suicidal ideation, psychosis, eating disorders, or medical emergencies)
-    3. the user message has enough detail to understand their issue (NOT just single vague words like "help", "bad", "stressed" with no context)
+    === WHEN TO USE THIS TOOL ===
+    Use this tool ONLY when ALL conditions are met:
     
-    do NOT use this tool when:
-    - user is in crisis or mentions suicide, self-harm, severe symptoms requiring professional help
-    - user is making casual conversation (greetings, small talk, non-mental-health questions)
-    - user message is too vague or ambiguous (ask for clarification first)
-    - you can provide support without needing technique selection
+    1. MENTAL HEALTH CONCERN IDENTIFIED:
+       - User expresses emotional distress (anxiety, depression, sadness, fear, anger, overwhelm)
+       - User describes negative thought patterns (self-criticism, catastrophizing, rumination)
+       - User mentions behavioral issues (avoidance, procrastination, withdrawal, compulsions)
+       - User reports panic symptoms (racing heart, difficulty breathing, dizziness)
+       - User shares stress or worry about specific situations
+       Examples: "i feel anxious about my presentation", "i think i'm a failure", "i can't stop worrying"
     
-    the tool returns the selected cbt technique with validation metadata that you should use to guide your therapeutic response.
+    2. APPROPRIATE FOR BRIEF CBT INTERVENTION:
+       - Concern is within scope of automated support
+       - User is not in immediate crisis
+       - Issue can benefit from cognitive/behavioral techniques
+       - Symptoms are mild to moderate in severity
+    
+    3. SUFFICIENT DETAIL PROVIDED:
+       - User describes a specific emotion, situation, or problem
+       - Message contains enough context to understand the concern
+       - Not just single vague words without explanation
+       Examples: "i feel anxious" (clear), "i'm worried about failing my exam" (clear), "help" (too vague)
+    
+    === WHEN NOT TO USE THIS TOOL ===
+    Do NOT use this tool if ANY of these apply:
+    
+    CRISIS SITUATIONS (requires immediate professional intervention):
+      - Suicidal ideation, self-harm urges, wanting to die
+      - Active psychosis (hallucinations, delusions, paranoia)
+      - Severe dissociation or loss of contact with reality
+      - Eating disorder behaviors (restricting, purging, excessive exercise)
+      - Medical emergencies (chest pain with arm numbness, suspected heart attack)
+      - Active substance abuse or withdrawal symptoms
+      - Abuse situations or unsafe living conditions
+      - Severe depression preventing basic functioning
+      → Instead: Provide empathetic crisis referral
+    
+    CASUAL CONVERSATION (not mental health related):
+      - Greetings and pleasantries ("hi", "how are you", "good morning")
+      - General knowledge questions ("what's the weather", "capital of france")
+      - Daily life questions ("what should i eat", "movie recommendations")
+      - Small talk about hobbies, entertainment, current events
+      - Sharing positive experiences without distress
+      → Instead: Respond naturally and warmly, do NOT call this tool
+    
+    INSUFFICIENT INFORMATION (too vague or ambiguous):
+      - Single words without context: "help", "bad", "stressed", "anxious", "sad"
+      - Vague statements: "i feel weird", "something is wrong", "not okay"
+      - No clear indication of what the issue is
+      → Instead: Ask clarifying questions warmly, do NOT call this tool yet
+    
+    NO TECHNIQUE SELECTION NEEDED:
+      - User just needs validation and empathy
+      - Simple psychoeducation would suffice
+      - Follow-up to previous conversation
+      → Instead: Respond directly with support, do NOT call this tool
+    
+    === DECISION FRAMEWORK ===
+    Ask yourself these questions in order:
+    
+    1. Is this a crisis? (suicide, self-harm, psychosis, medical emergency)
+       → YES: Crisis referral, do NOT use tool
+       → NO: Continue to question 2
+    
+    2. Is this about mental health? (emotions, thoughts, behaviors causing distress)
+       → NO: Casual response, do NOT use tool
+       → YES: Continue to question 3
+    
+    3. Does the message have enough detail? (specific emotion/situation/problem mentioned)
+       → NO: Ask for clarification, do NOT use tool
+       → YES: Continue to question 4
+    
+    4. Would a CBT technique meaningfully help this concern?
+       → NO: Provide direct support, do NOT use tool
+       → YES: USE THIS TOOL
+    
+    === WHAT THIS TOOL RETURNS ===
+    The tool performs sophisticated technique selection and returns:
+    
+    - selected_technique: The most appropriate CBT technique (e.g., "cognitive_restructuring")
+    - technique_description: Clinical description of the technique
+    - when_to_use: Guidance on appropriate application
+    - embedding_results: Top 3 semantically similar techniques with confidence scores
+    - validation_attempts: Expert validation reasoning for each candidate technique
+    
+    Use this returned information to:
+    1. Understand which CBT approach is most suitable
+    2. Guide your therapeutic response using the technique description
+    3. Apply the technique appropriately based on when_to_use guidelines
+    4. Maintain clinical appropriateness through validation insights
+    
+    === EXAMPLES ===
+    
+    USE TOOL:
+    - "i'm really anxious about my job interview tomorrow"
+      → Clear mental health concern with specific situation
+    - "i feel like everything i do is a failure"
+      → Clear negative thought pattern
+    - "i can't breathe and my heart is racing"
+      → Panic symptoms described with sufficient detail
+    - "i've been avoiding my friends for weeks"
+      → Clear behavioral pattern causing distress
+    
+    DO NOT USE TOOL:
+    - "i want to die" → CRISIS: provide referral
+    - "what should i cook for dinner?" → CASUAL: respond directly
+    - "help" → TOO VAGUE: ask for clarification
+    - "hi there" → GREETING: respond warmly
+    - "i hear voices telling me to hurt people" → CRISIS: immediate referral
+    
+    === REMEMBER ===
+    This tool is for CBT technique selection only. YOU are responsible for:
+    - Determining if the situation is appropriate for CBT
+    - Assessing if the user is in crisis
+    - Deciding if clarification is needed
+    - Generating the actual therapeutic response
+    
+    Only call this tool when you need to SELECT the specific CBT technique to apply.
     """
     #step 1: embedding-based selection
     embedding_results = select_technique_by_embedding(user_mental_health_concern, top_k=3)

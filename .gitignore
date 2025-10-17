@@ -9,9 +9,10 @@ __pycache__/
 # Ignore the Python virtual environment
 chatbot_proj/
 
+
+
 # Ignore macOS system files
 .DS_Store
-
 
 # Distribution / packaging
 .Python

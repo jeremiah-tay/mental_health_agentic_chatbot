@@ -20,7 +20,7 @@ load_dotenv()
 
 # --- 1. Initialize the Language Model ---
 # This single LLM instance will be passed to both the supervisor and booking agents.
-llm = ChatOpenAI(model="gpt-4o-mini", api_key=os.getenv("OPENAI_API_KEY"), temperature=0.2)
+llm = ChatOpenAI(model="gpt-5-mini", api_key=os.getenv("OPENAI_API_KEY"), temperature=0.2)
 
 # --- 2. Create the Main Application Graph ---
 # The supervisor graph is our main app. It contains all the routing logic,
@@ -31,11 +31,36 @@ app = create_supervisor_graph(llm)
 if __name__ == "__main__":
     st.title('Multi-Agent Mental Health Chatbot')
 
+    # Add a new chat button to the top right of the page
+    col1, col2 = st.columns([1, 3])
+    with col1:
+        if st.button("🔄 New Chat"):
+            # Clear all session state
+            for key in list(st.session_state.keys()):
+                del st.session_state[key]
+            st.rerun()
+    with col2:
+        st.write("")
+
     # Initialize session state for messages if it doesn't exist
     if "messages" not in st.session_state:
         # Just add the welcome message directly, don't invoke the graph
-        st.session_state.messages = [AIMessage(content="Hello! I'm your mental health assistant. I can help you find resources or book appointments. How may I help you today?")]
+        st.session_state.messages = [AIMessage(
+            content="""
+            Hello! I'm your mental health assistant. I am here to support you.
+
+            You can ask me to:
+            - Find resources or answer questions on mental health
+            - Guide you through a coping exercise
+            - Book an appointment with a therapist
+
+            How can I help you today?
+            """)]
     
+    # Initialize conversation_ended state
+    if "conversation_ended" not in st.session_state:
+        st.session_state.conversation_ended = False
+
     # Display all chat messages from the history
     for msg in st.session_state.messages:
         # Ensure the message has content before displaying
@@ -45,6 +70,12 @@ if __name__ == "__main__":
         elif isinstance(msg, HumanMessage):
             with st.chat_message("user", avatar="🧑‍💻"):
                 st.markdown(msg.content)
+    
+    # Show conversation ended message if applicable
+    if st.session_state.conversation_ended:
+        st.info("💬 This conversation has ended. Please refresh the page to start a new conversation.")
+        st.button("🔄 Start New Conversation", on_click=lambda: st.rerun())
+        st.stop()
 
     # Accept user input from the chat interface
     if prompt := st.chat_input("How can I help you?"):

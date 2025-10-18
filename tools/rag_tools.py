@@ -1,11 +1,15 @@
 # backend/tools/rag_tool.py
 
 from langchain.tools import tool
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from backend.utils.supabase_client import query_pgvector, client as openai_client
 
 @tool("rag_tool", return_direct=True)
 def rag_tool(query: str, k: int = 5):
     """Retrieve information from the PGVector database and respond empathetically."""
+    print(f"--- RAG TOOL: Calling RAG Tool with query: '{query}' ---")
     docs = query_pgvector(query, k)
 
     # Combine retrieved docs into one text
@@ -13,7 +17,7 @@ def rag_tool(query: str, k: int = 5):
 
     # Use LLM to craft empathetic response
     response = openai_client.chat.completions.create(
-        model="gpt-4o-mini",
+        model="gpt-5-mini",
         messages=[
             {"role": "system", "content":
              "You are a supportive assistant. Always sound empathetic, warm, and approachable. "

@@ -9,19 +9,22 @@ from enum import Enum
 from langchain_core.tools import tool
 from pydantic.v1 import BaseModel, Field
 from dotenv import load_dotenv
+from openai import OpenAI
 
 # --- env setup ---
 load_dotenv()
 SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY")
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-os.environ["GROQ_API_KEY"] = GROQ_API_KEY
+SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+# GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+# os.environ["GROQ_API_KEY"] = GROQ_API_KEY
+os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
 
 # --- initialize client ---
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-groq_client = Groq(api_key=GROQ_API_KEY)
-
-print("Supabase and Groq clients initialized")
+# groq_client = Groq(api_key=GROQ_API_KEY)
+openai_client = OpenAI(api_key=OPENAI_API_KEY)
+print("Supabase and OpenAI clients initialized")
 
 # --- cbt technique setup ---
 class CBTTechnique(Enum):
@@ -235,8 +238,8 @@ REASONING: the user is expressing feeling overwhelmed by practical challenges, w
 now evaluate the user concern above."""
     
     try:
-        response = groq_client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+        response = openai_client.chat.completions.create(
+            model="gpt-5-mini",
             messages=[
                 {"role": "user", "content": validation_prompt}
             ],
@@ -364,8 +367,8 @@ REASON: the general overwhelm and stress suggest chronic pressure rather than ac
 now evaluate the user concern above and select the most appropriate fallback technique."""
     
     try:
-        response = groq_client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+        response = openai_client.chat.completions.create(
+            model="gpt-5-mini",
             messages=[
                 {"role": "user", "content": comparison_prompt}
             ],
@@ -460,8 +463,8 @@ REASON: the acute physical symptoms and immediate distress require grounding's r
 now evaluate the user concern above and select the most appropriate technique from the approved options."""
     
     try:
-        response = groq_client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+        response = openai_client.chat.completions.create(
+            model="gpt-5-mini",
             messages=[
                 {"role": "user", "content": selection_prompt}
             ],
@@ -612,6 +615,7 @@ def select_cbt_technique(user_mental_health_concern: str) -> dict:
     
     Only call this tool when you need to SELECT the specific CBT technique to apply.
     """
+    print(f"--- SELECT CBT TECHNIQUE TOOL: Calling Select CBT Technique Tool with user_mental_health_concern: '{user_mental_health_concern}' ---")
     #step 1: embedding-based selection
     embedding_results = select_technique_by_embedding(user_mental_health_concern, top_k=3)
     
@@ -682,5 +686,5 @@ def select_cbt_technique(user_mental_health_concern: str) -> dict:
         "embedding_results": [(tech.value, float(score)) for tech, score in embedding_results],
         "validation_attempts": validation_attempts
     }
-
+   
 print("CBT technique selection tool initialized")

@@ -172,7 +172,7 @@ def chat_with_pgvector(payload: ChatRequest):
     # 3) Use GPT to answer with context
     try:
         completion = openai.chat.completions.create(
-            model="gpt-4o-mini",  # or "gpt-4o"
+            model="gpt-5-mini",  # or "gpt-4o"
             messages=[
                 {"role": "system", "content": "You are a mental health assistant. Use retrieved context to answer."},
                 {"role": "user", "content": f"Context:\n{context_text}\n\nQuestion: {payload.message}"}

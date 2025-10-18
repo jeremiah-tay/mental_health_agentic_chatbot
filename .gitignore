@@ -9,7 +9,9 @@ __pycache__/
 # Ignore the Python virtual environment
 chatbot_proj/
 
-
+# Ignore Google Cloud credentials
+credential.json
+token.json
 
 # Ignore macOS system files
 .DS_Store

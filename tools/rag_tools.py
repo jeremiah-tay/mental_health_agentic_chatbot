@@ -3,7 +3,7 @@ import os
 import json
 import pandas as pd
 from datetime import datetime
-from langchain.tools import StructuredTool
+from langchain.tools import tool
 from pydantic import BaseModel, Field
 from backend.utils.supabase_client import query_pgvector, client as openai_client
 
@@ -13,7 +13,18 @@ class RAGInput(BaseModel):
     top_k: int = Field(5, description="Number of top documents to retrieve")
 
 # --- Core RAG function ---
-def run_rag(query: str, top_k: int = 5):
+@tool
+def rag_tool(query: str, top_k: int = 5):
+    """Retrieve relevant context from the database and generate an empathetic answer.
+
+    This tool is best for when a user asks for information, definitions, or explanations
+    about mental health topics.
+
+    Args:
+        query (str): The user's specific question to search for in the database.
+        top_k (int): The number of top documents to retrieve. Defaults to 5.
+    """
+    print(f"--- RAG TOOL: Calling RAG Tool with query: '{query}' ---")
     # 1. Retrieve docs using pgvector
     docs = query_pgvector(query, top_k)
 
@@ -22,11 +33,13 @@ def run_rag(query: str, top_k: int = 5):
 
     # 3. Generate empathetic answer
     completion = openai_client.chat.completions.create(
-        model="gpt-4o-mini",
+        model="gpt-5-mini",
         messages=[
             {"role": "system", "content": (
-                "You are a kind and empathetic mental health assistant. "
-                "Use the provided context to answer supportively, offering reassurance and understanding."
+                """
+                You are a kind and empathetic mental health assistant.
+                Your job is to answer the user's question based on the provided context.
+                You must blend this factual information with a supportive, reassuring, and understanding tone to answer supportively."""
             )},
             {"role": "user", "content": f"Context:\n{context_text}\n\nQuestion: {query}"}
         ]
@@ -46,11 +59,3 @@ def run_rag(query: str, top_k: int = 5):
     print(f"Saved outputs to outputs/rag_results_{timestamp}.csv and outputs/rag_log_{timestamp}.json")
 
     return {"answer": answer, "retrieved_docs": docs}
-
-# --- Define as LangGraph-compatible tool ---
-rag_query = StructuredTool.from_function(
-    func=run_rag,
-    name="rag_query",
-    description="Retrieve relevant context from database and generate an empathetic answer",
-    args_schema=RAGInput
-)

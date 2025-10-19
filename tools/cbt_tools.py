@@ -491,8 +491,8 @@ class SelectCBTTechniqueArgs(BaseModel):
     user_mental_health_concern: str = Field(..., description="The user's mental health concern that needs CBT technique selection")
 
 # --- cbt technique selection tool ---
-@tool("select_cbt_technique", args_schema=SelectCBTTechniqueArgs)
-def select_cbt_technique(user_mental_health_concern: str) -> dict:
+@tool("select_cbt_tool", args_schema=SelectCBTTechniqueArgs)
+def select_cbt_tool(user_mental_health_concern: str) -> dict:
     """
     selects the most clinically appropriate CBT technique for a user's mental health concern through semantic analysis and expert validation.
     

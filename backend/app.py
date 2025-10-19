@@ -186,7 +186,7 @@ def chat_with_pgvector(payload: ChatRequest):
     return {"answer": answer, "sources": docs}
 '''
 ####################################################################################
-from tools.rag_tool import rag_query
+from tools.rag_tools import rag_query
 
 @app.post("/rag_query")
 def rag_query_endpoint(payload: dict):
@@ -196,4 +196,3 @@ def rag_query_endpoint(payload: dict):
 
     result = rag_query.invoke({"query": query})
     return result
-

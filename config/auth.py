@@ -6,9 +6,12 @@ from googleapiclient.discovery import build
 
 # --- CONFIGURATION ---
 SCOPES = ['https://www.googleapis.com/auth/calendar']
-CREDENTIALS_FILE = 'credential.json' # Make sure this matches your file name
-TOKEN_FILE = 'token.json'
+CREDENTIALS_FILE = 'credentials/credential.json'
+TOKEN_FILE = 'credentials/token.json'
 # ---------------------
+
+# Ensure credentials directory exists
+os.makedirs('credentials', exist_ok=True)
 
 def authenticate():
     """Handles Google authentication and creates token.json."""

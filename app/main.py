@@ -15,8 +15,19 @@ from langchain_openai import ChatOpenAI
 # Import the supervisor graph, which is now the main entry point to our application
 from agents.supervisor import create_supervisor_graph
 
+# Import the authentication function
+from config.auth import authenticate
+
 # Load environment variables from a .env file
 load_dotenv()
+
+# Check and run authentication if needed
+try:
+    authenticate()
+except Exception as e:
+    st.error(f"Authentication failed: {e}")
+    st.stop()
+
 
 # --- 1. Initialize the Language Model ---
 # This single LLM instance will be passed to both the supervisor and booking agents.

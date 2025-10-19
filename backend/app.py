@@ -134,6 +134,7 @@ async def upload_pdf(request: Request, file: UploadFile = File(...), source: str
 
 #################################################################################
 # --- Chat endpoint (PGVector as sub-agent) ---
+'''
 class ChatRequest(BaseModel):
     message: str
     k: int = 5
@@ -183,5 +184,15 @@ def chat_with_pgvector(payload: ChatRequest):
         raise HTTPException(status_code=500, detail=f"chat completion failed: {e}")
 
     return {"answer": answer, "sources": docs}
+'''
+####################################################################################
+from tools.rag_tools import rag_query
 
+@app.post("/rag_query")
+def rag_query_endpoint(payload: dict):
+    query = payload.get("query")
+    if not query:
+        raise HTTPException(status_code=400, detail="Query is required")
 
+    result = rag_query.invoke({"query": query})
+    return result

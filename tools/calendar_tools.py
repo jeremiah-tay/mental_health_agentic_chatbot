@@ -21,8 +21,8 @@ from auth import authenticate
 
 # --- Google Calendar Authentication & Service ---
 SCOPES = ["https://www.googleapis.com/auth/calendar"]
-CREDENTIALS_FILE = "credential.json"
-TOKEN_FILE = "token.json"
+CREDENTIALS_FILE = 'credentials/credential.json'
+TOKEN_FILE = 'credentials/token.json'    
 
 def get_calendar_service():
     """Authenticates with Google Calendar API and returns a service object."""

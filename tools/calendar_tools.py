@@ -17,7 +17,7 @@ from pydantic.v1 import BaseModel, Field
 
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, project_root)
-from auth import authenticate
+from config.auth import authenticate
 
 # --- Google Calendar Authentication & Service ---
 SCOPES = ["https://www.googleapis.com/auth/calendar"]

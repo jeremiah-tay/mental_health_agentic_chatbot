@@ -1,34 +1,56 @@
-# backend/tools/rag_tool.py
-
-from langchain.tools import tool
-import sys
+# tools/rag_tool.py
 import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import json
+import pandas as pd
+from datetime import datetime
+from langchain.tools import StructuredTool
+from pydantic import BaseModel, Field
 from backend.utils.supabase_client import query_pgvector, client as openai_client
 
-@tool("rag_tool", return_direct=True)
-def rag_tool(query: str, k: int = 5):
-    """Retrieve information from the PGVector database and respond empathetically."""
-    print(f"--- RAG TOOL: Calling RAG Tool with query: '{query}' ---")
-    docs = query_pgvector(query, k)
+# --- Input schema for the tool ---
+class RAGInput(BaseModel):
+    query: str = Field(..., description="User's query to search from database")
+    top_k: int = Field(5, description="Number of top documents to retrieve")
 
-    # Combine retrieved docs into one text
-    retrieved_text = " ".join(d["content"] for d in docs)
+# --- Core RAG function ---
+def run_rag(query: str, top_k: int = 5):
+    # 1. Retrieve docs using pgvector
+    docs = query_pgvector(query, top_k)
 
-    # Use LLM to craft empathetic response
-    response = openai_client.chat.completions.create(
-        model="gpt-5-mini",
+    # 2. Build context text
+    context_text = "\n\n".join([doc["content"] for doc in docs])
+
+    # 3. Generate empathetic answer
+    completion = openai_client.chat.completions.create(
+        model="gpt-4o-mini",
         messages=[
-            {"role": "system", "content":
-             "You are a supportive assistant. Always sound empathetic, warm, and approachable. "
-             "Ground your answer in the provided context, but speak as if to a friend."},
-            {"role": "user", "content": f"User asked: {query}\n\nContext:\n{retrieved_text}"}
+            {"role": "system", "content": (
+                "You are a kind and empathetic mental health assistant. "
+                "Use the provided context to answer supportively, offering reassurance and understanding."
+            )},
+            {"role": "user", "content": f"Context:\n{context_text}\n\nQuestion: {query}"}
         ]
     )
+    answer = completion.choices[0].message.content
 
-    answer = response.choices[0].message.content
+    # 4. Save outputs
+    os.makedirs("outputs", exist_ok=True)
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-    return {
-        "answer": answer,
-        "retrieved_docs": docs
-    }
+    df = pd.DataFrame(docs)
+    df.to_csv(f"outputs/rag_results_{timestamp}.csv", index=False)
+
+    with open(f"outputs/rag_log_{timestamp}.json", "w") as f:
+        json.dump({"query": query, "retrieved": docs, "answer": answer}, f, indent=2)
+
+    print(f"Saved outputs to outputs/rag_results_{timestamp}.csv and outputs/rag_log_{timestamp}.json")
+
+    return {"answer": answer, "retrieved_docs": docs}
+
+# --- Define as LangGraph-compatible tool ---
+rag_query = StructuredTool.from_function(
+    func=run_rag,
+    name="rag_query",
+    description="Retrieve relevant context from database and generate an empathetic answer",
+    args_schema=RAGInput
+)

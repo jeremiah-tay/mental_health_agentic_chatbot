@@ -7,9 +7,6 @@ Original file is located at
     https://colab.research.google.com/drive/1u48TRxZxQPFvdspOWpqUQhPFXEWBIOds
 """
 
-# install dependencies
-!pip install -q transformers peft torch numpy
-
 # imports and environment setup
 import os
 import torch

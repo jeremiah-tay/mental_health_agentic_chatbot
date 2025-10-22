@@ -33,7 +33,6 @@ class SafetyCheck:
     def __init__(self, base_dir="saved_models"):
         """
         Loads both primary and fallback models from the local saved_models folder.
-        No Hugging Face login or Google Drive mount required.
         """
         self.base_dir = base_dir
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -49,8 +48,6 @@ class SafetyCheck:
 
         print("loading fallback model (mentalroberta)...")
         self.fallback_model, self.fallback_tokenizer = self._load_model(self.fallback_path)
-
-    # ------------------------------------------------------------
 
     def _load_model(self, model_path):
         if not os.path.exists(model_path):
@@ -99,8 +96,6 @@ class SafetyCheck:
         print("   model loaded fully offline\n")
         return model, tok
 
-    # ------------------------------------------------------------
-
     def _predict(self, text, model, tokenizer):
         enc = tokenizer(
             text,
@@ -120,8 +115,6 @@ class SafetyCheck:
         print(f"prediction: {'at risk' if pred == 1 else 'not at risk'}")
         return pred
 
-    # ------------------------------------------------------------
-
     def __call__(self, text):
         try:
             return self._predict(text, self.primary_model, self.primary_tokenizer)
@@ -130,33 +123,3 @@ class SafetyCheck:
             print("switching to fallback model...")
             return self._predict(text, self.fallback_model, self.fallback_tokenizer)
 
-# example usage
-
-checker = SafetyCheck()
-
-texts = [
-    "I feel like nothing matters anymore.",
-    "Today was a wonderful day with my family.",
-    "im so happy i could die on the spot right now",
-    "laugh die me",
-    "when will this end",
-    "im feeling very anxious lately",
-    "im so tired i want to sleep forever",
-    "why is life so hard, i cant keep doing this",
-    "im so tired",
-    "i just ate a bottle of panadol, goodbye world",
-    " i think ill jump off a bridge tomorrow",
-    "i want to kill myself",
-    " my friend killed herself",
-    "my wife died, i want to join her",
-    "im had such a great day today!",
-    "its my birthday today!",
-    "i just dont see a point in living",
-    "i don't really enjoy life, it kinda just passes me by",
-    "i want to off myself",
-    "goodbye"
-]
-
-for t in texts:
-    result = checker(t)
-    print(f"returned value: {result}\n")

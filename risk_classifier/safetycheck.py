@@ -62,7 +62,6 @@ class SafetyCheck:
         self.fallback_threshold = self._load_threshold(self.fallback_path)
         print(f"loaded thresholds → primary={self.primary_threshold:.3f}, fallback={self.fallback_threshold:.3f}\n")
 
-    # ------------------------------------------------------------
 
     def _load_model(self, model_path):
         if not os.path.exists(model_path):
@@ -111,8 +110,6 @@ class SafetyCheck:
         print("   model loaded fully offline\n")
         return model, tok
 
-    # ------------------------------------------------------------
-
     def _load_threshold(self, model_path):
         """Load the tuned threshold value from best_meta.json if available."""
         meta_path = os.path.join(model_path, "best_meta.json")
@@ -146,8 +143,6 @@ class SafetyCheck:
         print(f"probabilities: [not at risk={probs[0]:.4f}, at risk={probs[1]:.4f}]")
         print(f"prediction: {'at risk' if pred == 1 else 'not at risk'} (threshold={threshold:.3f})")
         return pred
-
-    # ------------------------------------------------------------
 
     def __call__(self, text):
         """Run safety check on input text using primary (or fallback if fails)."""

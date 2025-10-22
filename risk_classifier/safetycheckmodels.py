@@ -456,7 +456,7 @@ print("\nselected primary and fallback by macro-f1 then macro-recall:")
 display(winners)
 winners.to_csv("/content/final_top2_nestedcv.csv", index=False)
 
-"""# **Retraining top 2 model with using hyperparameters**"""
+"""# **Retraining top 2 model with using best hyperparameters**"""
 
 # retrain and fully save top-2 models
 top2 = ["roberta__lora-finetune", "mentalroberta__lora-finetune"]

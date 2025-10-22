@@ -21,7 +21,7 @@ os.environ["HF_DATASETS_OFFLINE"] = "1"
 os.environ["HF_HUB_DISABLE_TELEMETRY"] = "1"
 os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
 
-# fix randomness for reproducibility
+# reproducibility
 torch.manual_seed(42)
 np.random.seed(42)
 random.seed(42)

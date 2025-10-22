@@ -1,6 +1,6 @@
 # Results
 
-This folder contains all evaluation outputs from model testing — including CSV summaries and visual plots from both **Phase 1 (Model Selection)** and **Phase 2 (Hyperparameter Tuning & Final Evaluation)**.
+This folder contains all evaluation outputs from model testing, including CSV summaries and visual plots from both **Phase 1 (Model Selection)** and **Phase 2 (Hyperparameter Tuning & Final Evaluation)**.
 
 ---
 

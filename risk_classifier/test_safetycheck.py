@@ -1,4 +1,4 @@
-from SafetyCheck import SafetyCheck
+from safetycheck import SafetyCheck
 
 # initialize
 checker = SafetyCheck()

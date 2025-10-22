@@ -44,6 +44,6 @@ returned value: 1
 ```
 
 # Notes
-* Models are downloaded from Google Drive and saved in saved_models/.
+* Models are downloaded from Google Drive and saved in `saved_models/`.
 * Runs completely offline after download.
 * Outputs are deterministic (no random variation between runs).

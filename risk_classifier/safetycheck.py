@@ -9,6 +9,7 @@ Original file is located at
 
 import os
 import random
+import json
 import numpy as np
 import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, AutoConfig
@@ -56,6 +57,13 @@ class SafetyCheck:
         print("loading fallback model (mentalroberta)...")
         self.fallback_model, self.fallback_tokenizer = self._load_model(self.fallback_path)
 
+        # load tuned thresholds from metadata
+        self.primary_threshold = self._load_threshold(self.primary_path)
+        self.fallback_threshold = self._load_threshold(self.fallback_path)
+        print(f"loaded thresholds → primary={self.primary_threshold:.3f}, fallback={self.fallback_threshold:.3f}\n")
+
+    # ------------------------------------------------------------
+
     def _load_model(self, model_path):
         if not os.path.exists(model_path):
             raise FileNotFoundError(f"model folder not found: {model_path}")
@@ -83,7 +91,7 @@ class SafetyCheck:
             ignore_mismatched_sizes=True
         )
 
-        # attach lora adapter if present
+        # attach LoRA adapter if present
         adapter_cfg = os.path.join(model_path, "adapter_config.json")
         adapter_weights = os.path.join(model_path, "adapter_model.safetensors")
         if os.path.exists(adapter_cfg) and os.path.exists(adapter_weights):
@@ -103,7 +111,24 @@ class SafetyCheck:
         print("   model loaded fully offline\n")
         return model, tok
 
-    def _predict(self, text, model, tokenizer):
+    # ------------------------------------------------------------
+
+    def _load_threshold(self, model_path):
+        """Load the tuned threshold value from best_meta.json if available."""
+        meta_path = os.path.join(model_path, "best_meta.json")
+        if os.path.exists(meta_path):
+            try:
+                with open(meta_path, "r") as f:
+                    data = json.load(f)
+                    return float(data.get("chosen_threshold", 0.5))
+            except Exception:
+                pass
+        return 0.5
+
+    # ------------------------------------------------------------
+
+    def _predict(self, text, model, tokenizer, threshold=0.5):
+        """Tokenize, infer probabilities, apply tuned threshold, and return 0/1."""
         enc = tokenizer(
             text,
             truncation=True,
@@ -116,17 +141,19 @@ class SafetyCheck:
             logits = model(**enc).logits
             probs = torch.softmax(logits, dim=1).cpu().numpy()[0]
 
-        pred = int(np.argmax(probs))
+        pred = int(probs[1] >= threshold)
         print(f"text: {text}")
         print(f"probabilities: [not at risk={probs[0]:.4f}, at risk={probs[1]:.4f}]")
-        print(f"prediction: {'at risk' if pred == 1 else 'not at risk'}")
+        print(f"prediction: {'at risk' if pred == 1 else 'not at risk'} (threshold={threshold:.3f})")
         return pred
 
+    # ------------------------------------------------------------
+
     def __call__(self, text):
+        """Run safety check on input text using primary (or fallback if fails)."""
         try:
-            return self._predict(text, self.primary_model, self.primary_tokenizer)
+            return self._predict(text, self.primary_model, self.primary_tokenizer, self.primary_threshold)
         except Exception as e:
             print("primary model failed:", e)
             print("switching to fallback model...")
-            return self._predict(text, self.fallback_model, self.fallback_tokenizer)
-
+            return self._predict(text, self.fallback_model, self.fallback_tokenizer, self.fallback_threshold)

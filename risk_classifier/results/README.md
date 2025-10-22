@@ -4,7 +4,7 @@ This folder contains all evaluation outputs from model testing — including CSV
 
 ---
 
-## 🧩 Experiment Overview
+## Experiment Overview
 
 ### **Phase 1 – Model Selection**
 - Used **5-fold cross-validation** across multiple model and feature setups.  

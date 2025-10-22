@@ -1,0 +1,7 @@
+transformers
+torch
+peft
+fastapi
+uvicorn
+numpy
+gdown

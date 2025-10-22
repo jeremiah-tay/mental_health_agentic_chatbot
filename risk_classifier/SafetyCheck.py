@@ -7,10 +7,10 @@ Original file is located at
     https://colab.research.google.com/drive/1u48TRxZxQPFvdspOWpqUQhPFXEWBIOds
 """
 
-# imports and environment setup
 import os
-import torch
+import random
 import numpy as np
+import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, AutoConfig
 from peft import PeftModel
 
@@ -20,6 +20,13 @@ os.environ["HF_HUB_OFFLINE"] = "1"
 os.environ["HF_DATASETS_OFFLINE"] = "1"
 os.environ["HF_HUB_DISABLE_TELEMETRY"] = "1"
 os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
+
+# fix randomness for reproducibility
+torch.manual_seed(42)
+np.random.seed(42)
+random.seed(42)
+torch.use_deterministic_algorithms(True, warn_only=True)
+torch.cuda.empty_cache()
 
 # SafetyCheck.py
 class SafetyCheck:

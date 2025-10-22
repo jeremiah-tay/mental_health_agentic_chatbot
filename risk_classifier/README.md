@@ -31,8 +31,9 @@ It classifies user text as **“at risk” (1)** or **“not at risk” (0)** us
    python test_safetycheck.py
 
 # Expected output
+```
 text: I feel like nothing matters anymore.
-probabilities: [not at risk=0.6078, at risk=0.3922]
+/n probabilities: [not at risk=0.6078, at risk=0.3922]
 prediction: not at risk
 returned value: 0
 
@@ -40,6 +41,7 @@ text: im so tired i want to sleep forever
 probabilities: [not at risk=0.3816, at risk=0.6184]
 prediction: at risk
 returned value: 1
+```
 
 # Notes
 * Models are downloaded from Google Drive and saved in saved_models/.

@@ -22,14 +22,15 @@ This folder contains all evaluation outputs from model testing, including CSV su
 ## File Flow
 ```
 Phase 1: Model Selection
-* phase1_model_selection.csv
+↓
+phase1_model_selection.csv
 ↓
 Phase 2: Nested CV & Hyperparameter Tuning
 ├── phase2_best_hyperparams_per_combo.csv
 ├── phase2_nestedcv_top2_fastgrid.csv
 └── phase2_summary_metrics.csv
 ↓
-Final Evaluation
+Final Evaluation: best parameters chosen based on mode across outer folds
 ↓
 final_top2_nestedcv.csv
 ```

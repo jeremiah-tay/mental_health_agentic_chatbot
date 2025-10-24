@@ -21,13 +21,6 @@ from config.auth import authenticate
 # Load environment variables from a .env file
 load_dotenv()
 
-# Check and run authentication if needed
-try:
-    authenticate()
-except Exception as e:
-    st.error(f"Authentication failed: {e}")
-    st.stop()
-
 
 # --- 1. Initialize the Language Model ---
 # This single LLM instance will be passed to both the supervisor and booking agents.
@@ -41,6 +34,17 @@ app = create_supervisor_graph(llm)
 # --- 3. Streamlit User Interface ---
 if __name__ == "__main__":
     st.title('Multi-Agent Mental Health Chatbot')
+
+    # Initialize authentication state - only run once per session
+    if "auth_completed" not in st.session_state:
+        with st.spinner("Setting up authentication..."):
+            try:
+                authenticate()
+                st.session_state.auth_completed = True
+                st.success("✅ Authentication completed successfully!")
+            except Exception as e:
+                st.error(f"❌ Authentication failed: {e}")
+                st.stop()
 
     # Add a new chat button to the top right of the page
     col1, col2 = st.columns([1, 3])

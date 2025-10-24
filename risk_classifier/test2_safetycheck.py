@@ -1,5 +1,7 @@
-# example usage
+import pandas as pd
+from safetycheck import SafetyCheck
 
+# example usage
 checker = SafetyCheck()
 
 texts = [

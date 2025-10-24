@@ -5,7 +5,7 @@ from safetycheck import SafetyCheck
 sc = SafetyCheck()
 
 # Load CSV file
-df = pd.read_csv("safetycheck_test_examples.csv")
+df = pd.read_csv("test_safetycheck_examples.csv")
 
 # Create a new column for predictions
 predictions = []

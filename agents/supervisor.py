@@ -17,6 +17,22 @@ from langgraph.prebuilt import ToolNode
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 load_dotenv()
 
+# Import the safety check
+from risk_classifier.safetycheck import SafetyCheck
+from risk_classifier.crisis_response import CrisisResponse
+
+# Import the risk classifier
+try:
+    risk_classifier = SafetyCheck(base_dir="risk_classifier/saved_models")
+    print("✅ Risk classifier loaded successfully")
+except FileNotFoundError as e:
+    print(f"⚠️ Risk classifier models not found: {e}")
+    print("⚠️ Running without risk assessment - models need to be downloaded")
+    risk_classifier = None
+except Exception as e:
+    print(f"⚠️ Risk classifier failed to load: {e}")
+    risk_classifier = None
+
 # Import your actual calendar tools
 from tools.calendar_tools import (
     list_calendars, list_events, insert_event, test_calendar_connection
@@ -120,6 +136,54 @@ def create_supervisor_graph(llm: ChatOpenAI):
         if not state.get("messages"):
             return {"messages": [AIMessage(content="Hello! I'm your mental health assistant. I can help you find resources or book appointments. How may I help you today?")]}
         return state
+    
+    def risk_assessment_node(state: SupervisorState):
+        """Assesses if the user's latest message indicates risk."""
+        print("--- SUPERVISOR: Running risk assessment... ---")
+        
+        # Check if risk classifier is available
+        if risk_classifier is None:
+            print("--- SUPERVISOR: Risk classifier not available, proceeding normally. ---")
+            return state
+        
+        # Get the latest user message
+        latest_message = None
+        for msg in reversed(state["messages"]):
+            if isinstance(msg, HumanMessage):
+                latest_message = msg.content
+                break
+        
+        if not latest_message:
+            print("--- SUPERVISOR: No user message found, proceeding normally. ---")
+            return state
+        
+        # Run risk classification
+        try:
+            risk_score = risk_classifier(latest_message)
+            print(f"--- SUPERVISOR: Risk assessment result: {risk_score} ---")
+            
+            if risk_score == 1:  # At risk
+                print("--- SUPERVISOR: CRISIS DETECTED - Returning crisis response. ---")
+                crisis_response = CrisisResponse(latest_message)
+                crisis_response = AIMessage(content=crisis_response)
+                return {
+                    "messages": [crisis_response],
+                    "conversation_ended": True
+                }
+            else:
+                print("--- SUPERVISOR: No risk detected, proceeding with normal flow. ---")
+                return state
+                
+        except Exception as e:
+            print(f"--- SUPERVISOR: Risk assessment failed: {e}, proceeding normally. ---")
+            return state
+    
+    def route_from_risk_assessment(state: SupervisorState):
+        """Route from risk assessment based on whether conversation ended."""
+        if state.get("conversation_ended"):
+            return END
+        else:
+            return "supervisor_router"
 
     def supervisor_router_node(state: SupervisorState):
         """The main decision-making node for the supervisor."""
@@ -171,13 +235,15 @@ def create_supervisor_graph(llm: ChatOpenAI):
     builder = StateGraph(SupervisorState)
 
     builder.add_node("start", start_node)
+    builder.add_node("risk_assessment", risk_assessment_node)
     builder.add_node("supervisor_router", supervisor_router_node)
     builder.add_node("supervisor_tools", supervisor_tool_node)
     builder.add_node("booking_agent", booking_agent_node)
 
     # --- Define the Edges ---
     builder.set_entry_point("start")
-    builder.add_edge("start", "supervisor_router")
+    builder.add_edge("start", "risk_assessment")
+    builder.add_conditional_edges("risk_assessment", route_from_risk_assessment)
 
     # Define the conditional routing logic from the supervisor router
     def route_from_supervisor(state: SupervisorState):

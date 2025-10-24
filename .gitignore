@@ -144,6 +144,19 @@ celerybeat.pid
 # SageMath parsed files
 *.sage.py
 
+# RAG outputs
+rag_log*.json
+rag_results*.csv
+._saved_models*
+
+# Risk classifier outputs
+saved_models/
+
+# Booking agent outputs
+booking_agent_log*.json
+booking_agent_results*.csv
+._booking_agent_saved_models/
+
 # Environments
 .envrc
 .venv

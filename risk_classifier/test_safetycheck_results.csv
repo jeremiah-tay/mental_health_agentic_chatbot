@@ -1,4 +1,4 @@
-safetycheck_results
+
 category,text,prediction
 suicidal_intent,I don’t want to be alive anymore.,1
 suicidal_intent,Everything hurts and I just want it all to end.,1
@@ -59,4 +59,5 @@ anxiety_or_depression_symptoms,I dread going to work every morning.,0
 anxiety_or_depression_symptoms,My chest feels tight all the time.,1
 anxiety_or_depression_symptoms,I’ve been having panic attacks lately.,0
 anxiety_or_depression_symptoms,I keep worrying that I’ll mess up again.,0
+
 anxiety_or_depression_symptoms,I feel numb and disconnected from everyone.,1

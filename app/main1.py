@@ -1,20 +1,22 @@
-# app/main.py
+# app/main1.py
 import sys
 import os
 import streamlit as st
 import requests
-from typing import List
-from langchain_core.messages import HumanMessage, AIMessage
 from dotenv import load_dotenv
+from langchain_core.messages import HumanMessage, AIMessage
+
+
+# Add project root to sys.path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from config.auth import authenticate
 
-# Add project root
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Load env
 load_dotenv()
 
-API_URL = "http://127.0.0.1:8000/chat"  # FastAPI backend endpoint
-
-st.set_page_config(page_title="Mental Health Chatbot", page_icon="💬")
+# --- Streamlit UI ---
+st.title("Multi-Agent Mental Health Chatbot")
 
 # --- Authentication ---
 if "auth_completed" not in st.session_state:
@@ -27,21 +29,20 @@ if "auth_completed" not in st.session_state:
             st.error(f"❌ Authentication failed: {e}")
             st.stop()
 
-st.title("💬 Multi-Agent Mental Health Chatbot")
-
-# --- Initialize messages ---
+# --- Chat setup ---
 if "messages" not in st.session_state:
-    st.session_state.messages = [AIMessage(content="""
-        Hello! I'm your mental health assistant.  
-        I can help you with:
-        - Finding mental health resources  
-        - Guiding coping exercises  
-        - Booking therapy sessions  
+    st.session_state.messages = [AIMessage(
+        content="""Hello! I'm your mental health assistant.
 
-        How can I support you today?
-    """)]
+You can ask me to:
+- Find mental health resources
+- Guide you through a coping exercise
+- Book an appointment with a therapist
 
-# --- Display messages ---
+How can I help you today?
+""")]
+
+# Display chat history
 for msg in st.session_state.messages:
     if isinstance(msg, AIMessage):
         with st.chat_message("ai", avatar="🤖"):
@@ -50,22 +51,33 @@ for msg in st.session_state.messages:
         with st.chat_message("user", avatar="🧑‍💻"):
             st.markdown(msg.content)
 
-# --- Handle user input ---
+# --- User Input ---
 if prompt := st.chat_input("How can I help you?"):
     st.session_state.messages.append(HumanMessage(content=prompt))
     with st.chat_message("user", avatar="🧑‍💻"):
         st.markdown(prompt)
 
-    with st.spinner("Thinking..."):
-        try:
-            response = requests.post(API_URL, json={"message": prompt})
-            response.raise_for_status()
-            bot_reply = response.json().get("response", "I'm sorry, something went wrong.")
-        except Exception as e:
-            bot_reply = f"❌ Error contacting backend: {e}"
+    # Prepare message history for backend
+    history = []
+    for m in st.session_state.messages[:-1]:
+        if isinstance(m, HumanMessage):
+            history.append({"role": "user", "content": m.content})
+        elif isinstance(m, AIMessage):
+            history.append({"role": "assistant", "content": m.content})
 
-    st.session_state.messages.append(AIMessage(content=bot_reply))
+    # Call backend FastAPI
     with st.chat_message("ai", avatar="🤖"):
-        st.markdown(bot_reply)
+        with st.spinner("Thinking..."):
+            try:
+                response = requests.post(
+                    "http://127.0.0.1:8000/chat",
+                    json={"message": prompt, "history": history}
+                )
+                response.raise_for_status()
+                reply = response.json()["response"]
+                st.markdown(reply)
+                st.session_state.messages.append(AIMessage(content=reply))
+            except Exception as e:
+                st.error(f"❌ Error contacting backend: {e}")
 
-    st.rerun()
+

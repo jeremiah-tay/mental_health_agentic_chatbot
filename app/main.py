@@ -122,3 +122,12 @@ if __name__ == "__main__":
         
         # Rerun the Streamlit script to update the UI immediately
         st.rerun()
+        
+import requests
+
+response = requests.post(
+    "http://127.0.0.1:8000/chat",
+    json={"message": user_input}
+)
+
+bot_reply = response.json()["response"]

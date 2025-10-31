@@ -192,20 +192,23 @@ def create_supervisor_graph(llm: ChatOpenAI):
                     "messages": [crisis_response_msg],
                     "risk_probability": risk_probability,
                     "conversation_ended": True,
-                    "agents_used": state.get("agents_used", []) + ["crisis_response"]
+                    "agents_used": state.get("agents_used", []) + ["crisis_response"],
+                    "tools_called": state.get("tools_called", []),     #preserve
+                    "tools_result": state.get("tools_result", {})      #preserve
                 }
             else:
                 print("--- SUPERVISOR: No risk detected, proceeding with normal flow. ---")
                 #EDITED - always set risk_probability in state
                 return {
-                    "risk_probability": risk_probability
+                    "risk_probability": risk_probability,
+                    "tools_called": state.get("tools_called", []),     #preserve
+                    "tools_result": state.get("tools_result", {}),     #preserve
+                    "agents_used": state.get("agents_used", [])        #preserve
                 }
                 
         except Exception as e:
             print(f"--- SUPERVISOR: Risk assessment failed: {e}, proceeding normally. ---")
             return state
-                
-
     
     def route_from_risk_assessment(state: SupervisorState):
         """Route from risk assessment based on whether conversation ended."""
@@ -215,91 +218,136 @@ def create_supervisor_graph(llm: ChatOpenAI):
             return "supervisor_router"
 
     def supervisor_router_node(state: SupervisorState):
-        """The main decision-making node for the supervisor."""
+        """the main decision-making node for the supervisor."""
         print("--- SUPERVISOR: Routing request... ---")
 
         response = supervisor_runnable.invoke({"messages": state["messages"]})
 
-        #NEW - track supervisor agent usage
+        #NEW - always preserve existing tracking data
         agents_used = state.get("agents_used", [])
         if "supervisor" not in agents_used:
             agents_used.append("supervisor")
 
-        # Check if the supervisor decided to end the conversation
+        #check if the supervisor decided to end the conversation
         if "__END__" in response.content:
             print("--- SUPERVISOR: LLM decided to end conversation. ---")
             
-            # Clean up the message for the user (remove the signal)
             final_message_content = response.content.replace("__END__", "").strip()
             final_message = AIMessage(content=final_message_content)
             
-            # Return the final goodbye message and end the graph
             return {
                 "messages": [final_message],
                 "conversation_ended": True,
-                "agents_used": agents_used
+                "agents_used": agents_used,
+                "tools_called": state.get("tools_called", []),  #preserve
+                "tools_result": state.get("tools_result", {})   #preserve
             }
         
-        # Case 1: Supervisor decides to use its own tools
+        #case 1: supervisor decides to use its own tools
         if response.tool_calls:
             print("--- SUPERVISOR: Decided to use own tools. ---")
             print(f"--- SUPERVISOR: Response: {response} ---")
             
-            #NEW - track which tools are being called
             tool_names = [tool_call["name"] for tool_call in response.tool_calls]
             existing_tools = state.get("tools_called", [])
             
             return {
                 "messages": [response],
                 "tools_called": existing_tools + tool_names,
-                "agents_used": agents_used
+                "agents_used": agents_used,
+                "tools_result": state.get("tools_result", {})  #preserve
             }
 
-        # Case 2: Supervisor decides to delegate to the booking agent
+        #case 2: supervisor decides to delegate to the booking agent
         if "delegating_to_booking_agent" in response.content:
             print("--- SUPERVISOR: Delegating to booking agent. ---")
             print(f"--- SUPERVISOR: Response: {response} ---")
-            # We don't add the "delegating..." message to the history
+            
             return {
                 "messages": [AIMessage(content="delegating_to_booking_agent")],
-                "agents_used": agents_used
+                "agents_used": agents_used,
+                "tools_called": state.get("tools_called", []),  #preserve
+                "tools_result": state.get("tools_result", {})   #preserve
             }
             
-        # Case 3: Supervisor responds directly
+        #case 3: supervisor responds directly
         print("--- SUPERVISOR: Responding directly. ---")
         print(f"--- SUPERVISOR: Response: {response} ---")
         return {
             "messages": [response],
-            "agents_used": agents_used
+            "agents_used": agents_used,
+            "tools_called": state.get("tools_called", []),  #preserve
+            "tools_result": state.get("tools_result", {})   #preserve
         }
 
     #EDITED - capture tool results in supervisor_tools_node
     def supervisor_tools_node(state: SupervisorState):
-        """Execute supervisor tools and capture results."""
+        """execute supervisor tools and capture results."""
         print("--- SUPERVISOR: Executing supervisor tools... ---")
         
-        #execute the tools
+        #initialize tracking
+        tools_called = state.get("tools_called", []).copy()  #make a copy to avoid mutation
+        tools_result = state.get("tools_result", {}).copy()
+        
+        #STEP 1: capture tool calls from the AIMessage BEFORE execution
+        last_ai_message = None
+        for msg in reversed(state["messages"]):
+            if hasattr(msg, "tool_calls") and msg.tool_calls:
+                last_ai_message = msg
+                break
+        
+        if last_ai_message and last_ai_message.tool_calls:
+            for tool_call in last_ai_message.tool_calls:
+                tool_name = tool_call["name"]
+                if tool_name not in tools_called:
+                    tools_called.append(tool_name)
+                    print(f"--- SUPERVISOR TOOLS: Registered tool call: {tool_name} ---")
+        
+        #STEP 2: execute the tools
         result = supervisor_tool_node.invoke(state)
         
-        #NEW - extract tool results from the tool messages
-        tool_results = state.get("tools_result", {})
+        #STEP 3: capture tool results from ToolMessage objects
         for msg in result["messages"]:
+            #check if this is a ToolMessage
             if hasattr(msg, "name") and hasattr(msg, "content"):
-                #this is a tool message
+                tool_name = msg.name
+                
+                #ensure tool is in tools_called list
+                if tool_name not in tools_called:
+                    tools_called.append(tool_name)
+                    print(f"--- SUPERVISOR TOOLS: Added tool from result: {tool_name} ---")
+                
+                #store tool result
                 try:
-                    #try to parse the content as it might be JSON or dict
                     import json
                     if isinstance(msg.content, str):
-                        tool_results[msg.name] = json.loads(msg.content)
+                        #try to parse as json
+                        try:
+                            parsed_content = json.loads(msg.content)
+                            tools_result[tool_name] = parsed_content
+                            print(f"--- SUPERVISOR TOOLS: Stored JSON result for {tool_name} ---")
+                        except json.JSONDecodeError:
+                            #if not json, store as string
+                            tools_result[tool_name] = msg.content
+                            print(f"--- SUPERVISOR TOOLS: Stored string result for {tool_name} ---")
                     else:
-                        tool_results[msg.name] = msg.content
-                except:
-                    #if parsing fails, just store as string
-                    tool_results[msg.name] = msg.content
+                        tools_result[tool_name] = msg.content
+                        print(f"--- SUPERVISOR TOOLS: Stored non-string result for {tool_name} ---")
+                except Exception as e:
+                    print(f"--- SUPERVISOR TOOLS: Error storing result for {tool_name}: {e} ---")
+                    tools_result[tool_name] = str(msg.content)
+            else:
+                #debug: log messages that don't match expected format
+                print(f"--- SUPERVISOR TOOLS: Skipping message without name/content: {type(msg)} ---")
+        
+        print(f"--- SUPERVISOR TOOLS: Final tools_called: {tools_called} ---")
+        print(f"--- SUPERVISOR TOOLS: Final tools_result keys: {list(tools_result.keys())} ---")
         
         return {
             "messages": result["messages"],
-            "tools_result": tool_results
+            "tools_called": tools_called,
+            "tools_result": tools_result,
+            "agents_used": state.get("agents_used", [])
         }
 
     def booking_agent_node(state: SupervisorState):
@@ -341,7 +389,9 @@ def create_supervisor_graph(llm: ChatOpenAI):
             "messages": booking_result["messages"],
             "agents_used": agents_used,
             "tools_called": existing_tools + booking_tools_called,
-            "tools_result": {**existing_results, **booking_tools_result}
+            "tools_result": {**existing_results, **booking_tools_result},
+            "conversation_ended": state.get("conversation_ended", False),  
+            "risk_probability": state.get("risk_probability", 0.0)
         }
 
     # --- Construct the Graph ---

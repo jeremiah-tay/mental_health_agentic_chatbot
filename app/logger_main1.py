@@ -102,7 +102,7 @@ if st.session_state.conversation_ended:
     # Second button when conversation ends
     col1, col2 = st.columns([1, 3])
     with col1:
-        if st.button("🔄 Start New Conversation", key="new_chat_ended"):
+        if st.button("🔄 New Chat", key="new_chat_ended"):
             # Clear all session state EXCEPT authentication
             keys_to_keep = ["auth_completed"]
             for key in list(st.session_state.keys()):
@@ -217,4 +217,5 @@ if prompt := st.chat_input("How can I help you?"):
                 )
     
     # Rerun to update UI
+
     st.rerun()

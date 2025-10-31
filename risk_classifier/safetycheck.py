@@ -142,13 +142,15 @@ class SafetyCheck:
         print(f"text: {text}")
         print(f"probabilities: [not at risk={probs[0]:.4f}, at risk={probs[1]:.4f}]")
         print(f"prediction: {'at risk' if pred == 1 else 'not at risk'} (threshold={threshold:.3f})")
-        return pred
+        return pred, probs[1]
 
     def __call__(self, text):
         """Run safety check on input text using primary (or fallback if fails)."""
         try:
-            return self._predict(text, self.primary_model, self.primary_tokenizer, self.primary_threshold)
+            pred, prob =  self._predict(text, self.primary_model, self.primary_tokenizer, self.primary_threshold)
+            return pred, prob
         except Exception as e:
             print("primary model failed:", e)
             print("switching to fallback model...")
-            return self._predict(text, self.fallback_model, self.fallback_tokenizer, self.fallback_threshold)
+            pred, prob =  self._predict(text, self.fallback_model, self.fallback_tokenizer, self.fallback_threshold)
+            return pred, prob

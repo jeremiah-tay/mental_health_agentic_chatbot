@@ -2,7 +2,6 @@ import os
 import numpy as np
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
-from groq import Groq
 from supabase import create_client, Client
 from typing import List, Dict, Tuple
 from enum import Enum
@@ -15,14 +14,11 @@ from openai import OpenAI
 load_dotenv()
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
-# GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-# os.environ["GROQ_API_KEY"] = GROQ_API_KEY
 os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
 
 # --- initialize client ---
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-# groq_client = Groq(api_key=GROQ_API_KEY)
 openai_client = OpenAI(api_key=OPENAI_API_KEY)
 print("Supabase and OpenAI clients initialized")
 
@@ -243,8 +239,7 @@ now evaluate the user concern above."""
             messages=[
                 {"role": "user", "content": validation_prompt}
             ],
-            temperature=0.3,
-            max_tokens=150
+            max_completion_tokens=150
         )
         
         response_text = response.choices[0].message.content.strip()
@@ -372,8 +367,7 @@ now evaluate the user concern above and select the most appropriate fallback tec
             messages=[
                 {"role": "user", "content": comparison_prompt}
             ],
-            temperature=0.3,
-            max_tokens=150
+            max_completion_tokens=150
         )
         
         response_text = response.choices[0].message.content.strip()
@@ -468,8 +462,7 @@ now evaluate the user concern above and select the most appropriate technique fr
             messages=[
                 {"role": "user", "content": selection_prompt}
             ],
-            temperature=0.3,
-            max_tokens=150
+            max_completion_tokens=150
         )
         
         response_text = response.choices[0].message.content.strip()

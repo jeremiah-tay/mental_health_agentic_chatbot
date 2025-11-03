@@ -95,6 +95,19 @@ def create_supervisor_graph(llm: ChatOpenAI):
 
         CRITICAL: You are speaking DIRECTLY to the user. Never describe what you should do - just do it and never say your thoughts out loud. 
 
+        **LOCAL HEALTH-RELATED RESOURCES (Singapore) **
+        When appropriate, provide these resources:
+        - Suicidal thoughts, emotional crisis - Samaritans of Singapore: 1767
+        - General mental health support- National Mindline: 1771 
+        - medical emergencies - Singapore Civil Defence Force: 995
+        - immediate danger - Singapore Police Force: 999
+        - violence and sexual harrassment- National Anti-Violence and Sexual Harassment Helpline: 1800 777 0000
+        
+        Only mention these resources when:
+        - User explicitly asks for help resources
+        - Situation suggests they need professional support
+        - User asks "who can I call" or "where can I get help"
+
         DECISION LOGIC:
         1. **Booking/Scheduling**: If the user wants to book, schedule, reschedule, cancel, or check appointment availability → delegate to booking agent (respond with: "delegating_to_booking_agent")
 

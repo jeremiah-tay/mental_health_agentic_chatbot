@@ -120,7 +120,7 @@ def get_conversation_stats(df: pd.DataFrame):
     stats['unique_tools'] = len(set(all_tools))
     stats['turns_with_tools'] = df['has_tools'].sum()
     stats['tool_usage_rate'] = (stats['turns_with_tools'] / stats['total_turns'] * 100) if stats['total_turns'] > 0 else 0
-    
+
     # Agent metrics
     all_agents = []
     for agents_list in df['agents_used_list']:

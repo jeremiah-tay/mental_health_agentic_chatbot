@@ -19,6 +19,12 @@ sentence-transformers>=2.2.0
 scikit-learn>=1.3.0
 numpy>=1.21.0
 
+# Analytics dependencies
+pandas-profiling>=3.0.0
+
+# Groq dependencies
+groq>=0.1.0
+
 # Database and storage dependencies
 supabase>=1.0.0
 psycopg2-binary>=2.9.0
@@ -45,5 +51,8 @@ Pillow>=9.0.0
 beautifulsoup4>=4.11.0
 tqdm>=4.64.0
 fastmcp>=2.0.0
+pandas-profiling>=3.0.0
+plotly>=5.0.0
 
-groq
+# Streamlit dependencies
+streamlit>=1.25.0

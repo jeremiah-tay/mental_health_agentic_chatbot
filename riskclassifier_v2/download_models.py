@@ -1,8 +1,8 @@
 import os, zipfile, gdown
 
-# gdrive link for finetuned models: https://drive.google.com/file/d/1xdwBoYPaAhJkqnwGcqdShDgmtNBUFTBz/view?usp=share_link
-# gdrive file id for finetuned and trained model: 1xdwBoYPaAhJkqnwGcqdShDgmtNBUFTBz
-FILE_ID = "1xdwBoYPaAhJkqnwGcqdShDgmtNBUFTBz" 
+# gdrive link for finetuned models: https://drive.google.com/file/d/1Hhl-sMI-usslHBP1hE8vb8KLDPyS-2ZC/view?usp=sharing
+# gdrive file id for finetuned and trained model: 1Hhl-sMI-usslHBP1hE8vb8KLDPyS-2ZC
+FILE_ID = "1Hhl-sMI-usslHBP1hE8vb8KLDPyS-2ZC" 
 OUTPUT_ZIP = "saved_models.zip"
 DEST_DIR = "saved_models"
 URL = f"https://drive.google.com/uc?id={FILE_ID}"

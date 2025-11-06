@@ -30,8 +30,8 @@ class SafetyCheck:
     SafetyCheck(text) → returns (pred, prob)
 
     Ensemble of:
-      - MentalRoBERTa (fine-tuned LoRA)
-      - MentalBERT (fine-tuned LoRA)
+      - MentalRoBERTa (fine-tuned)
+      - MentalBERT (fine-tuned)
     """
 
     def __init__(self, base_dir="saved_models"):
@@ -40,8 +40,8 @@ class SafetyCheck:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         # model paths
-        self.roberta_path = os.path.join(base_dir, "mentalroberta_final")
-        self.bert_path = os.path.join(base_dir, "mentalbert_final")
+        self.roberta_path = os.path.join(base_dir, "mental_mental-roberta-base")
+        self.bert_path = os.path.join(base_dir, "mental_mental-bert-base-uncased")
 
         print(f"using base directory: {self.base_dir}")
         print("loading model 1 (MentalRoBERTa)...")

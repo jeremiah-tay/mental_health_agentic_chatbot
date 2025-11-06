@@ -1,8 +1,8 @@
 import os, zipfile, gdown
 
-# gdrive link for finetuned models: https://drive.google.com/file/d/1Hhl-sMI-usslHBP1hE8vb8KLDPyS-2ZC/view?usp=sharing
-# gdrive file id for finetuned and trained model: 1Hhl-sMI-usslHBP1hE8vb8KLDPyS-2ZC
-FILE_ID = "1Hhl-sMI-usslHBP1hE8vb8KLDPyS-2ZC" 
+# Google Drive link for fine-tuned models
+# https://drive.google.com/file/d/1Hhl-sMI-usslHBP1hE8vb8KLDPyS-2ZC/view?usp=sharing
+FILE_ID = "1Hhl-sMI-usslHBP1hE8vb8KLDPyS-2ZC"
 OUTPUT_ZIP = "saved_models.zip"
 DEST_DIR = "saved_models"
 URL = f"https://drive.google.com/uc?id={FILE_ID}"
@@ -12,9 +12,9 @@ def download_and_extract():
     print(f"Downloading models from Google Drive...")
     gdown.download(URL, OUTPUT_ZIP, quiet=False)
 
-    print("Extracting models...")
+    print("Extracting models into:", DEST_DIR)
     with zipfile.ZipFile(OUTPUT_ZIP, "r") as zip_ref:
-        zip_ref.extractall(".")
+        zip_ref.extractall(DEST_DIR)  # <--- FIXED: extract inside saved_models/
     os.remove(OUTPUT_ZIP)
 
     print(f"Models ready in: {os.path.abspath(DEST_DIR)}")

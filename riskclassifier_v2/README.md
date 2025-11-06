@@ -13,6 +13,7 @@ It classifies user text as **“at risk” (1)** or **“not at risk” (0)** us
 | `download_models.py` | Downloads the trained models from Google Drive and extracts them into `saved_models/`. |
 | `requirements.txt` | Lists all Python packages needed to run this module. |
 | `safetycheckmodels.py` | Model testing, finetuning and training. |
+| `phase3_safetycheckvariant.py` | Testing different variants of riskclassifier. |
 | `results/` | Saved CSVs and plots from testing. |
 
 ---

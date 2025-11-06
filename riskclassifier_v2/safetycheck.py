@@ -32,8 +32,8 @@ class SafetyCheck:
         • probabilities for each class
 
     Ensemble of:
-      • mental_mental-roberta-base
-      • mental_mental-bert-base-uncased
+      • finetuned_mentalRoBERTa
+      • finetuned_mentalBERT
     """
 
     def __init__(self, base_dir="saved_models"):

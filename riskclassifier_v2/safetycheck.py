@@ -1,21 +1,16 @@
-# ============================================================
-# SafetyCheck — Offline Ensemble Risk Classifier (V4)
-# ============================================================
-
 import os
 import torch
 import numpy as np
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
-# ------------------------------------------------------------
-# Enforce OFFLINE MODE for reproducibility
-# ------------------------------------------------------------
+#enforce offline mode
 os.environ["TRANSFORMERS_OFFLINE"] = "1"
 os.environ["HF_HUB_OFFLINE"] = "1"
 os.environ["HF_DATASETS_OFFLINE"] = "1"
 os.environ["HF_HUB_DISABLE_TELEMETRY"] = "1"
 os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
 
+# reproducibility
 torch.manual_seed(42)
 np.random.seed(42)
 torch.use_deterministic_algorithms(True, warn_only=True)

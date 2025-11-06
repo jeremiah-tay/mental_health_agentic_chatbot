@@ -42,8 +42,8 @@ class SafetyCheck:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         # Local model paths
-        self.roberta_path = os.path.join(base_dir, "mentalroberta")
-        self.bert_path = os.path.join(base_dir, "mentalbert")
+        self.roberta_path = os.path.join(base_dir, "mental_mental-roberta-base")
+        self.bert_path = os.path.join(base_dir, "mental_mental-bert-base-uncased")
 
         print(f"[SafetyCheck] Using base directory: {self.base_dir}")
         self.roberta_model, self.roberta_tok = self._load_model(self.roberta_path)

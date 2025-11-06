@@ -1,118 +1,127 @@
+# -*- coding: utf-8 -*-
 import os
-import torch
+import random
+import json
 import numpy as np
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
-from importlib import import_module
+import torch
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, AutoConfig
+from peft import PeftModel
 
+# ============================================================
+# OFFLINE MODE + REPRODUCIBILITY
+# ============================================================
+os.environ["TRANSFORMERS_OFFLINE"] = "1"
+os.environ["HF_HUB_OFFLINE"] = "1"
+os.environ["HF_DATASETS_OFFLINE"] = "1"
+os.environ["HF_HUB_DISABLE_TELEMETRY"] = "1"
+os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
 
+torch.manual_seed(42)
+np.random.seed(42)
+random.seed(42)
+torch.use_deterministic_algorithms(True, warn_only=True)
+torch.cuda.empty_cache()
+
+# ============================================================
+# SAFETYCHECK ENSEMBLE
+# ============================================================
 class SafetyCheck:
     """
-    SafetyCheck(text, threshold=0.5)
-    ------------------------------------------------
-    Ensemble of:
-      • mental/mental-roberta-base
-      • mental/mental-bert-base-uncased
+    SafetyCheck(text) → returns (pred, prob)
 
-    Methods
-    --------
-    __call__(text, threshold=0.5, verbose=False)
-        Runs inference and returns both prediction and probabilities.
+    Ensemble of:
+      - MentalRoBERTa (fine-tuned LoRA)
+      - MentalBERT (fine-tuned LoRA)
     """
 
-    def __init__(self, base_dir: str = None):
-        """
-        Initializes the SafetyCheck ensemble.
-        Automatically checks for model folders and downloads them if missing.
-        """
-        if base_dir is None:
-            base_dir = os.path.join(os.path.dirname(__file__), "saved_models")
-
+    def __init__(self, base_dir="saved_models"):
+        """Loads both models locally and prepares ensemble."""
         self.base_dir = base_dir
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-        # Model paths
-        self.roberta_path = os.path.join(base_dir, "mental_mental-roberta-base")
-        self.bert_path = os.path.join(base_dir, "mental_mental-bert-base-uncased")
+        # model paths
+        self.roberta_path = os.path.join(base_dir, "mentalroberta_final")
+        self.bert_path = os.path.join(base_dir, "mentalbert_final")
 
-        print(f"[SafetyCheck] Using base directory: {self.base_dir}")
-        self._ensure_models_exist()
+        print(f"using base directory: {self.base_dir}")
+        print("loading model 1 (MentalRoBERTa)...")
+        self.model1, self.tok1 = self._load_model(self.roberta_path)
 
-        # Load both models
-        self.roberta_model, self.roberta_tok = self._load_model(self.roberta_path)
-        self.bert_model, self.bert_tok = self._load_model(self.bert_path)
+        print("loading model 2 (MentalBERT)...")
+        self.model2, self.tok2 = self._load_model(self.bert_path)
+
+        # load thresholds
+        self.thr1 = self._load_threshold(self.roberta_path)
+        self.thr2 = self._load_threshold(self.bert_path)
+        print(f"loaded thresholds → roberta={self.thr1:.3f}, bert={self.thr2:.3f}\n")
 
     # ------------------------------------------------------------
-    def _ensure_models_exist(self):
-        """
-        Ensures that the fine-tuned models exist locally.
-        If not found, automatically downloads them using download_models.py.
-        """
-        if not (os.path.exists(self.roberta_path) and os.path.exists(self.bert_path)):
-            print("Model folders not found. Running download_models.py...")
-            downloader = import_module("riskclassifier_v2.download_models")
-            downloader.download_and_extract()
+    def _load_model(self, model_path):
+        if not os.path.exists(model_path):
+            raise FileNotFoundError(f"model folder not found: {model_path}")
+
+        print(f"   loading from: {model_path}")
+        config = AutoConfig.from_pretrained(model_path, local_files_only=True)
+        tokenizer = AutoTokenizer.from_pretrained(model_path, local_files_only=True)
+
+        model_type = getattr(config, "model_type", "roberta")
+        base_model_id = {
+            "roberta": "roberta-base",
+            "bert": "bert-base-uncased"
+        }.get(model_type, "roberta-base")
+
+        base = AutoModelForSequenceClassification.from_pretrained(
+            base_model_id,
+            num_labels=getattr(config, "num_labels", 2),
+            local_files_only=False,
+            ignore_mismatched_sizes=True
+        )
+
+        adapter_cfg = os.path.join(model_path, "adapter_config.json")
+        adapter_weights = os.path.join(model_path, "adapter_model.safetensors")
+        if os.path.exists(adapter_cfg) and os.path.exists(adapter_weights):
+            print("   applying LoRA adapter weights...")
+            model = PeftModel.from_pretrained(base, model_path, local_files_only=True, is_trainable=False)
         else:
-            print("All model folders found locally.")
+            print("   no adapter found, using base model only")
+            model = base
 
-    # ------------------------------------------------------------
-    def _load_model(self, path: str):
-        """Loads a fine-tuned model and its tokenizer from the given path."""
-        tokenizer = AutoTokenizer.from_pretrained(path)
-        model = AutoModelForSequenceClassification.from_pretrained(path)
-        model.to(self.device).eval()
-        print(f"Loaded model from {path}")
+        model.to(self.device)
+        model.eval()
+        print("   model loaded successfully\n")
         return model, tokenizer
 
     # ------------------------------------------------------------
-    def _predict_probs(self, text: str, model, tokenizer):
-        """Generates class probabilities for a single text input."""
-        encoded = tokenizer(
-            text,
-            truncation=True,
-            padding=True,
-            max_length=256,
-            return_tensors="pt"
-        ).to(self.device)
-
-        with torch.no_grad():
-            logits = model(**encoded).logits
-            probs = torch.softmax(logits, dim=1).cpu().numpy()[0]
-
-        return probs
+    def _load_threshold(self, model_path):
+        meta_path = os.path.join(model_path, "best_meta.json")
+        if os.path.exists(meta_path):
+            try:
+                with open(meta_path, "r") as f:
+                    data = json.load(f)
+                    return float(data.get("chosen_threshold", 0.5))
+            except Exception:
+                pass
+        return 0.5
 
     # ------------------------------------------------------------
-    def __call__(self, text: str, threshold: float = 0.5, verbose: bool = False):
-        """
-        Performs ensemble prediction for the input text.
-        Averages 'at risk' probabilities from both models and applies thresholding.
+    def _predict_single(self, text, model, tokenizer):
+        """Get raw probability from one model."""
+        enc = tokenizer(text, truncation=True, padding=True, max_length=256, return_tensors="pt").to(self.device)
+        with torch.no_grad():
+            logits = model(**enc).logits
+            probs = torch.softmax(logits, dim=1).cpu().numpy()[0]
+        return probs[1]  # prob of "at risk"
 
-        Returns:
-            dict → {
-                "prediction": int,
-                "probs": {
-                    "not_at_risk": float,
-                    "at_risk": float
-                }
-            }
-        """
-        probs_roberta = self._predict_probs(text, self.roberta_model, self.roberta_tok)
-        probs_bert = self._predict_probs(text, self.bert_model, self.bert_tok)
+    # ------------------------------------------------------------
+    def __call__(self, text):
+        """Run ensemble inference and return (pred, prob)."""
+        prob1 = self._predict_single(text, self.model1, self.tok1)
+        prob2 = self._predict_single(text, self.model2, self.tok2)
+        avg_prob = (prob1 + prob2) / 2.0
 
-        avg_prob_1 = np.mean([probs_roberta[1], probs_bert[1]])
-        avg_prob_0 = 1 - avg_prob_1
-        pred = int(avg_prob_1 >= threshold)
+        pred = int(avg_prob >= 0.5)  # fixed ensemble threshold
+        print(f"text: {text}")
+        print(f"probabilities: [MentalRoBERTa={prob1:.4f}, MentalBERT={prob2:.4f}, ensemble_avg={avg_prob:.4f}]")
+        print(f"prediction: {'at risk' if pred == 1 else 'not at risk'}\n")
 
-        if verbose:
-            print(f"[Input] {text}")
-            print(f"Roberta → [0={probs_roberta[0]:.4f}, 1={probs_roberta[1]:.4f}]")
-            print(f"BERT    → [0={probs_bert[0]:.4f}, 1={probs_bert[1]:.4f}]")
-            print(f"Avg     → [not at risk={avg_prob_0:.4f}, at risk={avg_prob_1:.4f}]")
-            print(f"Prediction: {'at risk' if pred else 'not at risk'}")
-
-        return {
-            "prediction": pred,
-            "probs": {
-                "not_at_risk": float(avg_prob_0),
-                "at_risk": float(avg_prob_1)
-            }
-        }
+        return pred, avg_prob

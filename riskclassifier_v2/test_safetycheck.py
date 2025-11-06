@@ -66,8 +66,9 @@ groups = {
 for group, texts in groups.items():
     print(f"\n{'='*60}\nGROUP: {group}\n{'='*60}")
     for text in texts:
-        label, probs = sc(text, verbose=False)
-        pred_str = "At Risk" if label == 1 else "Not At Risk"
-        print(f"\n{text}")
-        print(f"→ Prediction: {pred_str}")
-        print(f"→ Probabilities: [not at risk={probs[0]:.4f}, at risk={probs[1]:.4f}]")
+        result = sc(text, verbose=False)
+        label = result["prediction"]
+        probs = result["probs"]
+        
+        print(f"→ Prediction: {'At Risk' if label == 1 else 'Not At Risk'}")
+        print(f"→ Probabilities: [not at risk={probs['not_at_risk']:.4f}, at risk={probs['at_risk']:.4f}]")

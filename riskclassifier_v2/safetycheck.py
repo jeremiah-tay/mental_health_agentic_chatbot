@@ -1,15 +1,15 @@
-# -*- coding: utf-8 -*-
-import os
-import random
-import json
-import numpy as np
-import torch
-from transformers import AutoTokenizer, AutoModelForSequenceClassification, AutoConfig
-from peft import PeftModel
+# ============================================================
+# SafetyCheck — Offline Ensemble Risk Classifier (V4)
+# ============================================================
 
-# ============================================================
-# OFFLINE MODE + REPRODUCIBILITY
-# ============================================================
+import os
+import torch
+import numpy as np
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
+
+# ------------------------------------------------------------
+# Enforce OFFLINE MODE for reproducibility
+# ------------------------------------------------------------
 os.environ["TRANSFORMERS_OFFLINE"] = "1"
 os.environ["HF_HUB_OFFLINE"] = "1"
 os.environ["HF_DATASETS_OFFLINE"] = "1"
@@ -18,110 +18,87 @@ os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
 
 torch.manual_seed(42)
 np.random.seed(42)
-random.seed(42)
 torch.use_deterministic_algorithms(True, warn_only=True)
 torch.cuda.empty_cache()
 
+
 # ============================================================
-# SAFETYCHECK ENSEMBLE
+# SAFETYCHECK CLASS (ENSEMBLE)
 # ============================================================
 class SafetyCheck:
     """
-    SafetyCheck(text) → returns (pred, prob)
+    SafetyCheck(text) → returns both:
+        • prediction (0 = not at risk, 1 = at risk)
+        • probabilities for each class
 
     Ensemble of:
-      - MentalRoBERTa (fine-tuned)
-      - MentalBERT (fine-tuned)
+      • mental_mental-roberta-base
+      • mental_mental-bert-base-uncased
     """
 
     def __init__(self, base_dir="saved_models"):
-        """Loads both models locally and prepares ensemble."""
+        """Load both fine-tuned models from the local saved_models directory."""
         self.base_dir = base_dir
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-        # model paths
+        # Local model paths
         self.roberta_path = os.path.join(base_dir, "mental_mental-roberta-base")
         self.bert_path = os.path.join(base_dir, "mental_mental-bert-base-uncased")
 
-        print(f"using base directory: {self.base_dir}")
-        print("loading model 1 (MentalRoBERTa)...")
-        self.model1, self.tok1 = self._load_model(self.roberta_path)
-
-        print("loading model 2 (MentalBERT)...")
-        self.model2, self.tok2 = self._load_model(self.bert_path)
-
-        # load thresholds
-        self.thr1 = self._load_threshold(self.roberta_path)
-        self.thr2 = self._load_threshold(self.bert_path)
-        print(f"loaded thresholds → roberta={self.thr1:.3f}, bert={self.thr2:.3f}\n")
+        print(f"[SafetyCheck] Using base directory: {self.base_dir}")
+        self.roberta_model, self.roberta_tok = self._load_model(self.roberta_path)
+        self.bert_model, self.bert_tok = self._load_model(self.bert_path)
 
     # ------------------------------------------------------------
-    def _load_model(self, model_path):
-        if not os.path.exists(model_path):
-            raise FileNotFoundError(f"model folder not found: {model_path}")
+    def _load_model(self, path):
+        """Load model and tokenizer fully offline."""
+        if not os.path.exists(path):
+            raise FileNotFoundError(f"❌ Model folder not found: {path}")
 
-        print(f"   loading from: {model_path}")
-        config = AutoConfig.from_pretrained(model_path, local_files_only=True)
-        tokenizer = AutoTokenizer.from_pretrained(model_path, local_files_only=True)
-
-        model_type = getattr(config, "model_type", "roberta")
-        base_model_id = {
-            "roberta": "roberta-base",
-            "bert": "bert-base-uncased"
-        }.get(model_type, "roberta-base")
-
-        base = AutoModelForSequenceClassification.from_pretrained(
-            base_model_id,
-            num_labels=getattr(config, "num_labels", 2),
-            local_files_only=False,
-            ignore_mismatched_sizes=True
-        )
-
-        adapter_cfg = os.path.join(model_path, "adapter_config.json")
-        adapter_weights = os.path.join(model_path, "adapter_model.safetensors")
-        if os.path.exists(adapter_cfg) and os.path.exists(adapter_weights):
-            print("   applying LoRA adapter weights...")
-            model = PeftModel.from_pretrained(base, model_path, local_files_only=True, is_trainable=False)
-        else:
-            print("   no adapter found, using base model only")
-            model = base
-
-        model.to(self.device)
-        model.eval()
-        print("   model loaded successfully\n")
-        return model, tokenizer
+        tok = AutoTokenizer.from_pretrained(path, local_files_only=True)
+        model = AutoModelForSequenceClassification.from_pretrained(path, local_files_only=True)
+        model.to(self.device).eval()
+        print(f"   ✅ Loaded model from {path}")
+        return model, tok
 
     # ------------------------------------------------------------
-    def _load_threshold(self, model_path):
-        meta_path = os.path.join(model_path, "best_meta.json")
-        if os.path.exists(meta_path):
-            try:
-                with open(meta_path, "r") as f:
-                    data = json.load(f)
-                    return float(data.get("chosen_threshold", 0.5))
-            except Exception:
-                pass
-        return 0.5
-
-    # ------------------------------------------------------------
-    def _predict_single(self, text, model, tokenizer):
-        """Get raw probability from one model."""
-        enc = tokenizer(text, truncation=True, padding=True, max_length=256, return_tensors="pt").to(self.device)
+    def _predict_probs(self, text, model, tokenizer):
+        """Return softmax probabilities for a single model."""
+        enc = tokenizer(
+            text,
+            truncation=True,
+            padding=True,
+            max_length=256,
+            return_tensors="pt"
+        ).to(self.device)
         with torch.no_grad():
             logits = model(**enc).logits
             probs = torch.softmax(logits, dim=1).cpu().numpy()[0]
-        return probs[1]  # prob of "at risk"
+        return probs
 
     # ------------------------------------------------------------
-    def __call__(self, text):
-        """Run ensemble inference and return (pred, prob)."""
-        prob1 = self._predict_single(text, self.model1, self.tok1)
-        prob2 = self._predict_single(text, self.model2, self.tok2)
-        avg_prob = (prob1 + prob2) / 2.0
+    def __call__(self, text, threshold=0.5, verbose=True):
+        """Run ensemble prediction and return dict with pred + probs."""
+        # Get probabilities from both models
+        probs_roberta = self._predict_probs(text, self.roberta_model, self.roberta_tok)
+        probs_bert = self._predict_probs(text, self.bert_model, self.bert_tok)
 
-        pred = int(avg_prob >= 0.5)  # fixed ensemble threshold
-        print(f"text: {text}")
-        print(f"probabilities: [MentalRoBERTa={prob1:.4f}, MentalBERT={prob2:.4f}, ensemble_avg={avg_prob:.4f}]")
-        print(f"prediction: {'at risk' if pred == 1 else 'not at risk'}\n")
+        # Average the "at risk" probabilities
+        avg_prob_1 = np.mean([probs_roberta[1], probs_bert[1]])
+        avg_prob_0 = 1 - avg_prob_1
+        pred = int(avg_prob_1 >= threshold)
 
-        return pred, avg_prob
+        if verbose:
+            print(f"\ntext: {text}")
+            print(f"roberta → [0={probs_roberta[0]:.4f}, 1={probs_roberta[1]:.4f}]")
+            print(f"bert    → [0={probs_bert[0]:.4f}, 1={probs_bert[1]:.4f}]")
+            print(f"avg     → [not at risk={avg_prob_0:.4f}, at risk={avg_prob_1:.4f}]")
+            print(f"prediction: {'at risk' if pred else 'not at risk'}")
+
+        return {
+            "prediction": pred,
+            "probs": {
+                "not_at_risk": float(avg_prob_0),
+                "at_risk": float(avg_prob_1)
+            }
+        }

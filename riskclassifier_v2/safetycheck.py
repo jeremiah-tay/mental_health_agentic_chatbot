@@ -42,8 +42,8 @@ class SafetyCheck:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         # Local model paths
-        self.roberta_path = os.path.join(base_dir, "mental_mental-roberta-base")
-        self.bert_path = os.path.join(base_dir, "mental_mental-bert-base-uncased")
+        self.roberta_path = os.path.join(base_dir, "mentalroberta")
+        self.bert_path = os.path.join(base_dir, "mentalbert")
 
         print(f"[SafetyCheck] Using base directory: {self.base_dir}")
         self.roberta_model, self.roberta_tok = self._load_model(self.roberta_path)
@@ -53,12 +53,12 @@ class SafetyCheck:
     def _load_model(self, path):
         """Load model and tokenizer fully offline."""
         if not os.path.exists(path):
-            raise FileNotFoundError(f"❌ Model folder not found: {path}")
+            raise FileNotFoundError(f"Model folder not found: {path}")
 
         tok = AutoTokenizer.from_pretrained(path, local_files_only=True)
         model = AutoModelForSequenceClassification.from_pretrained(path, local_files_only=True)
         model.to(self.device).eval()
-        print(f"   ✅ Loaded model from {path}")
+        print(f"Loaded model from {path}")
         return model, tok
 
     # ------------------------------------------------------------

@@ -21,12 +21,12 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 load_dotenv()
 
 # Import the safety check
-from riskclassifier_v2.safetycheck import SafetyCheck
-from riskclassifier_v2.crisis_response import CrisisResponse
+from risk_classifier_v3.safetycheck import SafetyCheck
+from risk_classifier_v3.crisis_response import CrisisResponse
 
 # Import the risk classifier
 try:
-    risk_classifier = SafetyCheck(base_dir="riskclassifier_v2/saved_models")
+    risk_classifier = SafetyCheck(base_dir="risk_classifier_v3/saved_models")
     print("✅ Risk classifier loaded successfully")
 except FileNotFoundError as e:
     print(f"⚠️ Risk classifier models not found: {e}")

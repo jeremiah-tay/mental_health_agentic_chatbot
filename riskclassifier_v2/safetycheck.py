@@ -90,10 +90,4 @@ class SafetyCheck:
             print(f"avg     → [not at risk={avg_prob_0:.4f}, at risk={avg_prob_1:.4f}]")
             print(f"prediction: {'at risk' if pred else 'not at risk'}")
 
-        return {
-            "prediction": pred,
-            "probs": {
-                "not_at_risk": float(avg_prob_0),
-                "at_risk": float(avg_prob_1)
-            }
-        }
+        return pred, round(float(avg_prob_1), 5)

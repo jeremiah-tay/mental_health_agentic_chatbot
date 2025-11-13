@@ -10,7 +10,6 @@ __pycache__/
 chatbot_proj/
 
 # Ignore Google Cloud credentials
-credential.json
 token.json
 
 # Ignore macOS system files
@@ -227,3 +226,4 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+credentials/credential.json

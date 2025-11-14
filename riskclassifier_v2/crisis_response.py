@@ -6,10 +6,10 @@ def CrisisResponse(user_message: str):
         "I'm really sorry that you're feeling this way. It sounds like you're going through a very difficult time right now, "
         "and I want you to know that you don’t have to face this alone.\n\n"
 
-        "If you’re in **Singapore**, you can reach out to:\n"
-        "• Samaritans of Singapore (SOS): **1767** (24 hours)\n"
-        "• Institute of Mental Health (IMH) Helpline: **6389 2222** (24 hours)\n"
-        "• National CARE Hotline: **1800-202-6868** (8am–12am daily)\n\n"
+        "If you’re in **Singapore**, you can reach out to:\n\n"
+        "• Samaritans of Singapore (SOS): **1767** (24 hours)\n\n"
+        "• Institute of Mental Health (IMH) Helpline: **6389 2222** (24 hours)\n\n"
+        "• National Mindline: **1771** (24 hours)\n\n"
         "• Emergency (Police / Ambulance): **999** or **995**\n\n"
 
         "If you’re **outside Singapore**, please visit [findahelpline.com](https://findahelpline.com) "

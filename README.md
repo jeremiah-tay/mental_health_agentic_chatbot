@@ -88,24 +88,23 @@ pip install pypdf
 
 ### 4. Environment Variables Setup
 
-Create a `.env` file in the project root directory:
+In the `.env` file in the project root directory:
 
 ```bash
-touch .env
+DATABASE_URL = ""
+SUPABASE_URL = ""
+SUPABASE_SERVICE_ROLE_KEY = ""
+OPENAI_API_KEY = ""
+ALLOWED_ORIGINS=
+LLM_MODEL=
+OPENAI_EMBEDDING_MODEL=
 ```
 
 Add the following environment variables to `.env`:
-
+The rest of the keys, please refer to the appendix section of our group report to obtain them
 ```env
 # OpenAI Configuration
 OPENAI_API_KEY=your_openai_api_key_here
-
-# Supabase Configuration
-SUPABASE_URL=your_supabase_project_url
-SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
-
-# Optional: Risk Classifier (if using)
-# RISK_CLASSIFIER_MODEL_PATH=riskclassifier_v2/saved_models
 ```
 
 **How to obtain credentials:**

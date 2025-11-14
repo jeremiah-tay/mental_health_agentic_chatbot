@@ -101,7 +101,8 @@ OPENAI_EMBEDDING_MODEL=
 ```
 
 Add the following environment variables to `.env`:
-The rest of the keys, please refer to the appendix section of our group report to obtain them
+- You will have to use your own OpenAI API KEY
+- The rest of the keys, please refer to the appendix section of our group report.
 ```env
 # OpenAI Configuration
 OPENAI_API_KEY=your_openai_api_key_here
@@ -113,12 +114,6 @@ OPENAI_API_KEY=your_openai_api_key_here
   1. Go to https://platform.openai.com/api-keys
   2. Create a new API key
   3. Copy and paste into `.env`
-
-- **Supabase Credentials**:
-  1. Create a project at https://supabase.com
-  2. Go to Project Settings > API
-  3. Copy the Project URL and Service Role Key
-  4. Ensure PGVector extension is enabled in your database
 
 ### 5. Google Calendar Setup
 
@@ -149,108 +144,9 @@ python config/auth.py
 
 This will:
 - Open a browser window for Google authentication
+- Refer to the appendix section to obtain the username and password for the google account (WHERE SHOULD I BEST PUT THIS)
 - Save the token to `credentials/token.json`
 - Verify the connection
-
-### 6. Supabase Database Setup
-
-#### Step 6.1: Create Required Tables
-
-You'll need to set up the following tables in your Supabase database:
-
-1. **conversation_log** table:
-```sql
-CREATE TABLE conversation_log (
-    id BIGSERIAL PRIMARY KEY,
-    conversation_id TEXT NOT NULL,
-    conversation_turn INTEGER NOT NULL,
-    human_message TEXT,
-    ai_message TEXT NOT NULL,
-    tools_called JSONB DEFAULT '[]',
-    tools_result JSONB DEFAULT '{}',
-    agents_used JSONB DEFAULT '[]',
-    conversation_ended BOOLEAN DEFAULT FALSE,
-    risk_probability FLOAT DEFAULT 0.0,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-```
-
-2. **cbt_techniques** table (for CBT tool):
-```sql
-CREATE TABLE cbt_techniques (
-    id SERIAL PRIMARY KEY,
-    technique_name TEXT UNIQUE NOT NULL,
-    description TEXT,
-    example_phrases JSONB,
-    indicators JSONB,
-    emotional_states JSONB,
-    when_to_use TEXT,
-    when_not_to_use TEXT
-);
-```
-
-3. **documents** table (for RAG):
-```sql
-CREATE TABLE documents (
-    id BIGSERIAL PRIMARY KEY,
-    content TEXT,
-    metadata JSONB,
-    embedding VECTOR(1536)  -- Adjust dimension based on your embedding model
-);
-```
-
-#### Step 6.2: Set Up PGVector Extension
-
-```sql
-CREATE EXTENSION IF NOT EXISTS vector;
-```
-
-#### Step 6.3: Create Match Function (for RAG)
-
-```sql
-CREATE OR REPLACE FUNCTION match_documents(
-    query_embedding VECTOR(1536),
-    match_limit INT DEFAULT 5
-)
-RETURNS TABLE (
-    id BIGINT,
-    content TEXT,
-    metadata JSONB,
-    similarity FLOAT
-)
-LANGUAGE plpgsql
-AS $$
-BEGIN
-    RETURN QUERY
-    SELECT
-        documents.id,
-        documents.content,
-        documents.metadata,
-        1 - (documents.embedding <=> query_embedding) AS similarity
-    FROM documents
-    ORDER BY documents.embedding <=> query_embedding
-    LIMIT match_limit;
-END;
-$$;
-```
-
-### 7. Risk Classifier Models (Optional)
-
-The risk classifier models are optional. If you want to enable risk assessment:
-
-1. The models should be placed in `riskclassifier_v2/saved_models/`
-2. The system will automatically load them if available
-3. If models are not found, the chatbot will run without risk assessment
-
-**Note**: The `risk_classifier` and `riskclassifier_v2` folders are archived and should not be modified.
-
-### 8. Populate Knowledge Base (Optional)
-
-To enable RAG functionality, you can populate the `documents` table in Supabase:
-
-1. Place PDF files in the `pdf/` directory
-2. Use the PDF loader utility to extract and embed content
-3. Store embeddings in the Supabase `documents` table
 
 ## Running the Application
 
@@ -405,10 +301,6 @@ Key dependencies:
 - **Google Calendar API**: Appointment scheduling
 
 See `requirements.txt` for complete list.
-
-## License
-
-[Add your license here]
 
 ## Support
 

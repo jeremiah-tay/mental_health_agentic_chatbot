@@ -69,8 +69,16 @@ venv\Scripts\activate
 
 ### 3. Install Dependencies
 
+#### Step 3.1: Install Main Dependencies
+
 ```bash
 pip install -r requirements.txt
+```
+
+#### Step 3.2: Download Risk Classifier Model
+
+```bash
+python riskclassifier_v2/download_models.py
 ```
 
 **Note**: If you encounter issues with PyPDF2, you may need to install `pypdf` instead:

@@ -23,7 +23,7 @@ from tools.calendar_tools import (
     list_calendars, list_events, insert_event, test_calendar_connection
 )
 
-llm = ChatOpenAI(model="gpt-4o-mini", api_key=os.getenv("OPENAI_API_KEY"), temperature=0.2)
+llm = ChatOpenAI(model="gpt-5-mini", api_key=os.getenv("OPENAI_API_KEY"), temperature=0.2)
 
 class BookingAgentState(TypedDict):
     """

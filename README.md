@@ -58,7 +58,7 @@ cd mental_health_agentic_chatbot
 ### 2. Create Virtual Environment
 
 ```bash
-python -m venv venv
+python -m venv chatbot_proj
 
 # On macOS/Linux:
 source venv/bin/activate

@@ -10,7 +10,7 @@
 
 ### 🤖 Mental Health Multi-Agentic Chatbot 🤖
 
-![Chatbot Demo Animation](https://media.tenor.com/tS1i-M-1-4gAAAAM/chatbot-chat-bot.gif)
+![Chatbot Demo Animation](https://app.lottiefiles.com/share/32d3a87c-f097-420f-a56f-01d9ba158ce5)
 
 </div>
 

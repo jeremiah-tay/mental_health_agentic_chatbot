@@ -88,8 +88,9 @@ mental_health_agentic_chatbot/
 │   ├── logger.py                    # Conversation logging
 │   └── analytics.py                 # Analytics dashboard
 ├── risk_classifier/                 # Risk assessment models (archived)
-├── riskclassifier_v2/               # Risk assessment models
+├── riskclassifier_v2/               # Current Risk assessment models
 ├── credentials/                     # Google Calendar credentials
+│   └── README.md                    # Instructions on obtaining Google OAuth credentials
 ├── pdf/                             # PDF documents for RAG
 │   └── adhd-2024.pdf                # Example PDF
 ├── outputs/                         # Generated outputs and logs

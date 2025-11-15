@@ -14,8 +14,24 @@
   - [Repository Structure](#repository-structure)
   - [Database Schema](#database-schema)
 - [Setup Instructions](#setup-instructions)
-  - [1. Clone the Repository](#1.-clone-the-repository)
+  - [1. Clone the Repository](#1-clone-the-repository)
+  - [2. Create Virtual Environment](#2-create-virtual-environment)
+  - [3. Install Dependencies](#3-install-dependencies)
+  - [4. Environment Variables Setup](#4-environment-variables-setup)
+  - [5. Google Calendar Setup](#5-google-calendar-setup)
 - [Running the Application](#running-the-application)
+  - [Start the Backend Server](#start-the-backend-server)
+  - [Start the Frontend Application](#start-the-frontend-application)
+  - [Verify Installation](#verify-installation)
+- [Usage](#usage)
+  - [Basic Chat](#basic-chat)
+  - [Booking an Appointment](#booking-an-appointment)
+  - [CBT Techniques](#cbt-techniques)
+  - [Analytics Dashboard](#analytics-dashboard)
+- [Troubleshooting](#troubleshooting)
+  - [Common Issues](#common-issues)
+  - [Support](#support)
+- [Group Members](#group-members)
 
 [🔼 Back to Top](#table-of-contents)
 
@@ -278,6 +294,8 @@ Once both servers are running, follow these steps to verify:
    
 2. **Frontend**: The Streamlit app should load with the mental health assistant interface
 
+[🔼 Back to Top](#table-of-contents)
+
 # Usage
 
 ## Basic Chat
@@ -316,6 +334,8 @@ This provides insights into:
 - Risk assessment metrics
 - Agent performance
 
+[🔼 Back to Top](#table-of-contents)
+
 # Troubleshooting
 
 ## Common Issues
@@ -343,54 +363,14 @@ This provides insights into:
    - Backend: Change port with `--port 8001`
    - Frontend: Streamlit will automatically use next available port
 
-## Debug Mode
-
-Enable debug logging by setting environment variable:
-```bash
-export PYTHONPATH="${PYTHONPATH}:$(pwd)"
-```
-
-# Development
-
-## Code Structure
-
-- **Agents**: LangGraph state machines for conversation orchestration
-- **Tools**: LangChain tools for specific functionalities
-- **Backend**: FastAPI REST API for chat processing
-- **Frontend**: Streamlit UI for user interaction
-
-### Adding New Tools
-
-1. Create tool function in `tools/` directory
-2. Use `@tool` decorator from `langchain_core.tools`
-3. Add tool to supervisor agent in `agents/supervisor.py`
-
-## Environment Variables Reference
-
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `OPENAI_API_KEY` | OpenAI API key for LLM | Yes |
-| `SUPABASE_URL` | Supabase project URL | Yes |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key | Yes |
-
-## Dependencies
-
-Key dependencies:
-- **FastAPI**: Backend API framework
-- **Streamlit**: Frontend UI framework
-- **LangChain/LangGraph**: Agent orchestration
-- **OpenAI**: LLM provider
-- **Supabase**: Database and vector search
-- **Google Calendar API**: Appointment scheduling
-
-See `requirements.txt` for complete list.
-
 ## Support
 
 For issues and questions:
 - Check the troubleshooting section
 - Review error messages in console
 - Verify all environment variables are set correctly
+
+[🔼 Back to Top](#table-of-contents)
 
 # Group Members
 | Name           | GitHub         | 

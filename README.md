@@ -3,10 +3,10 @@
 # DSA4213 Natural Language Processing in Data Science
 
 [![](https://img.shields.io/badge/Python-3.9%2B-blue?logo=python)]()
-[![](https://img.shields.io/badge/Framework-FastAPI-green?logo=fastapi)]()
+[![](https://img.shields.io/badge/Agents-LangGraph-%231C3C3C?logo=langgraph&logoColor=white)]()
+[![](https://img.shields.io/badge/Backend-FastAPI-green?logo=fastapi)]()
 [![](https://img.shields.io/badge/Frontend-Streamlit-red?logo=streamlit)]()
 [![](https://img.shields.io/badge/Database-Supabase-brightgreen?logo=supabase)]()
-[![](https://img.shields.io/badge/Agents-LangGraph-%231C3C3C?logo=langgraph&logoColor=white)]()
 
 ### 🌍 Mental Health Multi-Agentic Chatbot 🌍
 

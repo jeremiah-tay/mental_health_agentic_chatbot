@@ -8,9 +8,10 @@
 [![](https://img.shields.io/badge/Frontend-Streamlit-red?logo=streamlit)]()
 [![](https://img.shields.io/badge/Database-Supabase-brightgreen?logo=supabase)]()
 
-### 🤖 Mental Health Multi-Agentic Chatbot 🤖
 
-![Chatbot Demo Animation](https://app.lottiefiles.com/share/32d3a87c-f097-420f-a56f-01d9ba158ce5)
+<img src="./images/animation.gif" alt="Chatbot Demo Animation" width="300">
+
+## 🤖 Mental Health Multi-Agentic Chatbot 🤖
 
 </div>
 
@@ -44,11 +45,11 @@
 
 # About the Project
 ## Agentic Chatbot in Mental Health
-An intelligent mental health assistant built with LangGraph, Streamlit, and FastAPI.
+We built a multi-agent AI mental health assistant using LangGraph, Streamlit, and FastAPI.
 
-We created this project to address a critical gap in mental health care: a large portion of people struggling with mental health issues do not seek formal help. While many turn to AI chatbots for support, these tools are often failing them in the most critical moments.
+This project aims to address a critical gap in mental healthcare: a large portion of people struggling with mental health issues do not seek formal help. While many turn to AI chatbots for support, these tools are often failing them in the most critical moments.
 
-Most existing chatbots rely on simple keyword detection for risk assessment, causing them to underestimate or miss serious suicide risk and offer only generic, unhelpful replies. Our goal was to build a safer, more effective assistant. By using a multi-agent architecture, our chatbot provides real, evidence-based support—like CBT and appointment booking—while a robust risk assessment system works to ensure users in crisis are safely guided toward the professional help they urgently need.
+Most existing chatbots rely on **simple keyword detection** for risk assessment, causing them to underestimate or miss serious suicide risk and offer only generic, unhelpful replies. Our goal is to **build a safer, more effective assistant**. By using a multi-agent architecture, our chatbot provides real, evidence-based support, like CBT and appointment booking, while a robust risk assessment system works to ensure users in crisis are safely guided toward the professional help they urgently need.
 
 
 ## Features
@@ -69,27 +70,38 @@ Most existing chatbots rely on simple keyword detection for risk assessment, cau
 
 ```
 mental_health_agentic_chatbot/
-├── app/                    # Streamlit frontend application
-│   └── main.py            # Main Streamlit UI
-├── backend/               # FastAPI backend server
-│   ├── api_server.py      # API endpoints
-│   └── utils/             # Backend utilities
-├── agents/                # LangGraph agents
-│   ├── supervisor.py      # Main supervisor agent
-│   └── booking.py         # Booking agent
-├── tools/                 # LangChain tools
-│   ├── cbt_tools.py       # CBT technique selection
-│   ├── rag_tools.py       # RAG retrieval
-│   └── calendar_tools.py  # Google Calendar integration
-├── config/                # Configuration files
-│   └── auth.py            # Google Calendar authentication
-├── conversation_history/   # Conversation logging and analytics
-│   ├── logger.py          # Conversation logging
-│   └── analytics.py       # Analytics dashboard
-├── riskclassifier_v2/     # Risk assessment models (archived)
-├── credentials/           # Google Calendar credentials
-├── pdf/                   # PDF documents for RAG
-└── outputs/               # Generated outputs and logs
+├── app/                             # Streamlit frontend application
+│   └── main.py                      # Main Streamlit UI
+├── backend/                         # FastAPI backend server
+│   ├── api_server.py                # API endpoints
+│   ├── utils/                       # Backend utilities
+│       ├── pdf_loader.py            # Extracting text from PDF
+│       └── supabase_client.py       # Client for logging conversations to Supabase
+├── agents/                          # LangGraph agents
+│   ├── supervisor.py                # Main supervisor agent
+│   └── booking.py                   # Booking agent
+├── tools/                           # LangChain tools
+│   ├── cbt_tools.py                 # CBT technique selection
+│   ├── rag_tools.py                 # RAG retrieval
+│   └── calendar_tools.py            # Google Calendar integration
+├── config/                          # Configuration files
+│   └── auth.py                      # Google Calendar authentication
+├── conversation_history/            # Conversation logging and analytics
+│   ├── logger.py                    # Conversation logging
+│   └── analytics.py                 # Analytics dashboard
+├── risk_classifier/                 # Risk assessment models (archived)
+├── riskclassifier_v2/               # Risk assessment models
+├── credentials/                     # Google Calendar credentials
+├── pdf/                             # PDF documents for RAG
+│   └── adhd-2024.pdf                # Example PDF
+├── outputs/                         # Generated outputs and logs
+│   └── rag_log_20251019_180822.json # Example RAG json output
+├── images/                          # Store images and gifs
+│   └── animation.gif                # gif for README
+│── .gitignore                       # Specifies files to ignore
+│── .env                             # Example environment variables
+│── requirements.txt                 # Python dependencies
+├── README.md                        # Project overview and setup instructions
 ```
 
 ## Prerequisites

@@ -6,6 +6,7 @@
 [![](https://img.shields.io/badge/Framework-FastAPI-green?logo=fastapi)]()
 [![](https://img.shields.io/badge/Frontend-Streamlit-red?logo=streamlit)]()
 [![](https://img.shields.io/badge/Database-Supabase-brightgreen?logo=supabase)]()
+[![](https://img.shields.io/badge/Agents-LangGraph-%231C3C3C?logo=langgraph&logoColor=white)]()
 
 ### 🌍 Mental Health Multi-Agentic Chatbot 🌍
 

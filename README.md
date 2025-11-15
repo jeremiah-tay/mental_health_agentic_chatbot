@@ -52,73 +52,73 @@ mental_health_agentic_chatbot/
 Our team will be using Supabase to host it online @ [![Supabase](https://img.shields.io/badge/Supabase-Database-green?logo=supabase&style=flat-square)](https://supabase.io/). If you would like to access our Postgres database, please contact us for the login details.
 
 ### `rag_text_chunks`
-Stores the raw text chunks extracted from the mental health PDF documents
+Stores the raw text chunks extracted from the mental health PDF documents.
 
 | Column     | Type     | Description                               |
 |------------|----------|-------------------------------------------|
-| `id`  | INT  | Unique identifier for the text chunk                       |
+| `id`  | INT (PK) | Unique identifier for the text chunk                       |
 | `metadata`     | JSONB      | Stores metadata about the chunk                    |
-| `source`  | VARCHAR  | The original PDF document source (e.g., 'nimh-anxiety.pdf')     |
+| `source`  | TEXT  | The original PDF document source     |
 | `chunk_number` | INT  | The sequential index of the chunk within its source document           |
-| `content` | VARCHAR     | The raw text content of the chunk                      |
+| `content` | TEXT     | The raw text content of the chunk                      |
 
 ### `documents`
-Stores chunks of 700 tokens with 200-token overlap of PDF Mental Health documents texts and embeddings
+Stores the vector embeddings for each text chunk, enabling RAG similarity search via `pgvector`.
 
 | Column     | Type     | Description                               |
 |------------|----------|-------------------------------------------|
-| `id`  | INT  | ID number of chunk                       |
-| `source`     | VARCHAR      | Information on the chunk                    |
-| `content`  | VARCHAR  | Chunk where the text was taken from     |
-| `chunk index` | INT  | X number of chunk           |
-| `embedding` | VARCHAR     | Text                      |
-| `created_at` | TIMESTAMP     | Text                      |
+| `id`  | INT (PK) | Unique identifier for the document embedding                       |
+| `source`     | TEXT      | The original document source                    |
+| `content`  | TEXT  | The raw text content of the chunk     |
+| `chunk index` | INT  | The sequential index of the chunk           |
+| `embedding` | vector     | The vector embedding for the `content`                      |
+| `created_at` | TIMESTAMPTZ     | Timestamp of when the embedding was created                      |
 
 ### `risk_classifier_data`
-Stores chunks of 700 tokens with 200-token overlap of PDF Mental Health documents texts and embeddings
+Stores the labeled training data used to fine-tune the Risk Classifier model.
 
 | Column     | Type     | Description                               |
 |------------|----------|-------------------------------------------|
-| `id`  | INT  | ID number of chunk                       |
-| `text`     | VARCHAR      | Information on the chunk                    |
-| `label`  | VARCHAR  | Chunk where the text was taken from     |
+| `id`  | INT (PK)  | Unique identifier for the training sample                       |
+| `text`     | VARCHAR      | The user input text sample                    |
+| `label`  | VARCHAR  | The classification label (e.g., 1 for at-risk, 0 for not-at-risk).     |
 
 constraint risk_classifier_data_pkey primary key (id)
 
 
 ### `cbt_techniques`
-Stores chunks of 700 tokens with 200-token overlap of PDF Mental Health documents texts and embeddings
+Stores the profiles for each Cognitive Behavioural Therapy (CBT) technique used by the CBT tool.
 
 | Column     | Type     | Description                               |
 |------------|----------|-------------------------------------------|
-| `technique_name`  | VARCHAR  | ID number of chunk                       |
-| `description`     | VARCHAR      | Information on the chunk                    |
-| `example_phrases`  | VARCHAR  | Chunk where the text was taken from     |
-| `indicators` | VARCHAR  | X number of chunk           |
-| `emotional_states` | VARCHAR     | Text                      |
-| `when_to_use` | VARCHAR     | Text                      |
-| `when_not_to_use` | VARCHAR     | Text                      |
+| `technique_name`  | TEXT (PK) | The unique name of the CBT technique                       |
+| `description`     | TEXT      | A clinical description of the technique                    |
+| `example_phrases`  | TEXT[]  | An array of example user phrases that match this technique     |
+| `indicators` | TEXT  | Clinical indicators for when to use this technique           |
+| `emotional_states` | TEXT[]     | An array of target emotional states (e.g., 'anxiety', 'sadness')    |
+| `when_to_use` | TEXT     | Specific use cases or scenarios                      |
+| `when_not_to_use` | TEXT     | Contraindications (when this technique is inappropriate)           |
 
 constraint cbt_techniques_pkey
 
 ### `conversation_log`
-Stores chunks of 700 tokens with 200-token overlap of PDF Mental Health documents texts and embeddings
+Stores a detailed log of every conversation turn for analysis and monitoring on the analytics dashboard.
 
 | Column     | Type     | Description                               |
 |------------|----------|-------------------------------------------|
-| `id`  | VARCHAR  | ID number of chunk                       |
-| `conversation_id`     | VARCHAR      | Information on the chunk                    |
-| `conversation_turn`  | VARCHAR  | Chunk where the text was taken from     |
-| `human_message` | VARCHAR  | X number of chunk           |
-| `ai_message` | VARCHAR     | Text                      |
-| `tools_called` | VARCHAR     | Text                      |
-| `tools_result` | VARCHAR     | Text                      |
-| `agents_used` | VARCHAR     | Text                      |
-| `conversation_ended` | VARCHAR     | Text                      |
-| `created_at` | VARCHAR     | Text                      |
-| `risk_probability` | VARCHAR     | Text                      |
+| `id`  | UUID (PK)  | Unique identifier for the log entry                       |
+| `conversation_id`     | UUID      | Identifier linking all turns in a single conversation     |
+| `conversation_turn`  | INT  | The sequence number of the turn in the conversation     |
+| `human_message` | TEXT  | The user's message           |
+| `ai_message` | TEXT     | The chatbot's response                      |
+| `tools_called` | TEXT[]     | An array of tool names the agent decided to call                      |
+| `tools_result` | JSONB     | The JSON data returned from the tools                      |
+| `agents_used` | TEXT[]     | An array of agents that were activated (e.g., 'Supervisor')                      |
+| `conversation_ended` | BOOLEAN     | true if the conversation was terminated (e.g., crisis path)                      |
+| `created_at` | TIMESTAMPTZ     | Timestamp of when the conversation turn occurred                      |
+| `risk_probability` | FLOAT     | The risk score (0.0 to 1.0) for the human_message                      |
 
-constraint conversation_log_pkey primary key (id),
+constraint conversation_log_pkey primary key (id)
 constraint conversation_log_conversation_id_conversation_turn_key unique (conversation_id, conversation_turn)
   
 ## Setup Instructions

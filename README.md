@@ -189,7 +189,7 @@ UNIQUE (conversation_id, conversation_turn)
 ## 1. Clone the Repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/jeremiah-tay/mental_health_agentic_chatbot.git
 cd mental_health_agentic_chatbot
 ```
 

@@ -121,17 +121,17 @@ Stores a detailed log of every conversation turn for analysis and monitoring on 
 
 | Column     | Type     | Description                               |
 |------------|----------|-------------------------------------------|
-| `id`  | UUID   | Unique identifier for the log entry                       |
-| `conversation_id`     | UUID      | Identifier linking all turns in a single conversation     |
-| `conversation_turn`  | INT  | The sequence number of the turn in the conversation     |
+| `id`  | UUID   | Unique identifier for the log entry              |
+| `conversation_id`     | UUID      | Identifier linking all turns in a single conversation   |
+| `conversation_turn`  | INT  | The sequence number of the turn in the conversation    |
 | `human_message` | TEXT  | The user's message           |
-| `ai_message` | TEXT     | The chatbot's response                      |
-| `tools_called` | TEXT[]     | An array of tool names the agent decided to call                      |
+| `ai_message` | TEXT     | The chatbot's response    |
+| `tools_called` | TEXT[]     | An array of tool names the agent decided to call   |
 | `tools_result` | JSONB     | The JSON data returned from the tools                      |
-| `agents_used` | TEXT[]     | An array of agents that were activated (e.g., 'Supervisor')                      |
-| `conversation_ended` | BOOLEAN     | true if the conversation was terminated (e.g., crisis path)                      |
-| `created_at` | TIMESTAMPTZ     | Timestamp of when the conversation turn occurred                      |
-| `risk_probability` | FLOAT     | The risk score (0.0 to 1.0) for the human_message                      |
+| `agents_used` | TEXT[]     | An array of agents that were activated (e.g., 'Supervisor')         |
+| `conversation_ended` | BOOLEAN     | true if the conversation was terminated (e.g., crisis path)        |
+| `created_at` | TIMESTAMPTZ     | Timestamp of when the conversation turn occurred         |
+| `risk_probability` | FLOAT     | The risk score (0.0 to 1.0) for the human_message          |
 ```sql
 CONSTRAINT conversation_log_conversation_id_conversation_turn_key 
 UNIQUE (conversation_id, conversation_turn)
@@ -218,7 +218,7 @@ This is required for the Appointment Booking agent to function.
 
 ### Step 5.2: Authenticate
 
-This final step links your project to your Google Calendar.
+This final step links your project to your Google Calendar:
 1. Make sure your `credentials/credential.json` file is saved in the correct folder.
 2. Run the authentication script:
    ```bash
@@ -254,24 +254,20 @@ The frontend will automatically open in your browser at `http://localhost:8501`
 
 Once both servers are running, follow these steps to verify:
 
-1.**Check the Backend Terminal Log**
-at the terminal where you ran `uvicorn`. You should see success mssages confirming that all components have loaded.
-
-
-[TO BE EDITED]
-2. **Backend Health Check**: Visit `http://127.0.0.1:8000` - you should see:
-   ```json
-   {
-    "status": "online",
-    "risk_classifier_status": "✅ Risk classifier loaded successfully",
-    "cbt_tool_status": "Loaded 6 CBT technique profiles from Supabase",
-    "message": "Embedding model loaded and 6 technique embeddings computed. CBT technique selection tool initialized"
-  }
+1. **Check the Backend Terminal Log**
+   At the terminal where you ran `uvicorn`. You should see success mssages confirming that all components have loaded.
    ```
-
+   ✅ Risk classifier loaded successfully
+   Supabase and OpenAI clients initialized
+   Loaded 6 CBT technique profiles from Supabase
+   Embedding model loaded and 6 technique embeddings computed
+   CBT technique selection tool initialized
+   INFO:     Started server process [33767]
+   INFO:     Waiting for application startup.
+   INFO:     Application startup complete.
+   ```
+   
 2. **Frontend**: The Streamlit app should load with the mental health assistant interface
-
-3. **Google Calendar**: Try booking an appointment to verify calendar integration
 
 # Usage
 
@@ -283,7 +279,7 @@ at the terminal where you ran `uvicorn`. You should see success mssages confirmi
 
 ## Booking an Appointment
 
-1. Click on  (e.g., "Book a session for tomorrow at 2pm")
+1. Click on `Book an Appointment with a Therapist` or type "Book a session for tomorrow at 2pm"
 2. Provide your name when prompted
 3. The system will create a calendar event
 
@@ -360,20 +356,6 @@ export PYTHONPATH="${PYTHONPATH}:$(pwd)"
 2. Use `@tool` decorator from `langchain_core.tools`
 3. Add tool to supervisor agent in `agents/supervisor.py`
 
-### Testing
-
-Run linting:
-```bash
-# Install development dependencies
-pip install black flake8 mypy
-
-# Format code
-black .
-
-# Check linting
-flake8 .
-```
-
 ## Environment Variables Reference
 
 | Variable | Description | Required |
@@ -401,6 +383,10 @@ For issues and questions:
 - Review error messages in console
 - Verify all environment variables are set correctly
 
-## Contributing
-
-[Add contribution guidelines if applicable]
+# Group Members
+| Name           | GitHub         | 
+|----------------|-----------------|
+| Jeremiah Tay    | [jeremiah-tay](https://github.com/jeremiah-tay) |
+| Sim Zhi Sherng   | [sim-zhi-sherng](https://github.com/ZhiSherng) |
+| Wynnona Pheeby | [wynpyy](https://github.com/wynpyy)  | 
+| Rachel Chun | [rachel](https://github.com/Chxlz)  | 

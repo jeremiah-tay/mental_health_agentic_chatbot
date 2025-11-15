@@ -4,13 +4,22 @@
 
 
 ### 🌍 Mental Health Multi-Agentic Chatbot 🌍
+
+</div>
+
+## Table of Contents
+- [About the Project](#about-the-project)
+  - [Agentic Chatbot in Mental Health] (#agentic-chatbot-in-mental-health)
+  - [Features](#features)
+
+# About the Project
+## Agentic Chatbot in Mental Health
 An intelligent mental health assistant built with LangGraph, Streamlit, and FastAPI.
 
 We created this project to address a critical gap in mental health care: a large portion of people struggling with mental health issues do not seek formal help. While many turn to AI chatbots for support, these tools are often failing them in the most critical moments.
 
-Most existing bots rely on simple keyword detection for risk assessment, causing them to underestimate or miss serious suicide risk and offer only generic, unhelpful replies. Our goal was to build a safer, more effective assistant. By using a multi-agent architecture, our chatbot provides real, evidence-based support—like CBT and appointment booking—while a robust risk assessment system works to ensure users in crisis are safely guided toward the professional help they urgently need.
+Most existing chatbots rely on simple keyword detection for risk assessment, causing them to underestimate or miss serious suicide risk and offer only generic, unhelpful replies. Our goal was to build a safer, more effective assistant. By using a multi-agent architecture, our chatbot provides real, evidence-based support—like CBT and appointment booking—while a robust risk assessment system works to ensure users in crisis are safely guided toward the professional help they urgently need.
 
-</div>
 
 ## Features
 
@@ -22,7 +31,6 @@ Most existing bots rely on simple keyword detection for risk assessment, causing
 - **Analytics Dashboard**: Comprehensive conversation analytics and insights
 - **Conversation Logging**: Persistent storage of all interactions in Supabase
 
-## Table of Contents
 
 
 

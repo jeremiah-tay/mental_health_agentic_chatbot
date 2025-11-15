@@ -14,7 +14,10 @@
   - [Repository Structure](#repository-structure)
   - [Database Schema](#database-schema)
 - [Setup Instructions](#setup-instructions)
+  - [1. Clone the Repository](#clone-the-repository)
 - [Running the Application](#running-the-application)
+
+[🔼 Back to Top](#table-of-contents)
 
 # About the Project
 ## Agentic Chatbot in Mental Health
@@ -37,7 +40,7 @@ Most existing chatbots rely on simple keyword detection for risk assessment, cau
 
 
 
-
+[🔼 Back to Top](#table-of-contents)
 
 ## Repository Structure
 
@@ -137,6 +140,8 @@ CONSTRAINT conversation_log_conversation_id_conversation_turn_key
 UNIQUE (conversation_id, conversation_turn)
 ```
 
+[🔼 Back to Top](#table-of-contents)
+
 # Setup Instructions
 
 ## 1. Clone the Repository
@@ -207,6 +212,8 @@ OPENAI_API_KEY=your_openai_api_key_here
   2. Create a new API key
   3. Copy the key and paste it into `OPENAI_API_KEY`.
 
+[🔼 Back to Top](#table-of-contents)
+
 ## 5. Google Calendar Setup
 This is required for the Appointment Booking agent to function.
 
@@ -227,6 +234,8 @@ This final step links your project to your Google Calendar:
 3. The script will open a browser window for Google authentication.
 4. Log in with the Google Account found in the **appendix section of our Final Group Report**
 5. Once you log in and permission in granted, the script will create a `credentials/token.json` file. This token is what the chatbot uses to securely manage your calendar.
+
+[🔼 Back to Top](#table-of-contents)
 
 # Running the Application
 

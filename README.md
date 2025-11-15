@@ -14,7 +14,7 @@
   - [Repository Structure](#repository-structure)
   - [Database Schema](#database-schema)
 - [Setup Instructions](#setup-instructions)
-  - [1. Clone the Repository](#clone-the-repository)
+  - [1. Clone the Repository](#1.-clone-the-repository)
 - [Running the Application](#running-the-application)
 
 [🔼 Back to Top](#table-of-contents)

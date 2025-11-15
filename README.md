@@ -8,7 +8,9 @@
 [![](https://img.shields.io/badge/Frontend-Streamlit-red?logo=streamlit)]()
 [![](https://img.shields.io/badge/Database-Supabase-brightgreen?logo=supabase)]()
 
-### 🌍 Mental Health Multi-Agentic Chatbot 🌍
+### 🤖 Mental Health Multi-Agentic Chatbot 🤖
+
+![Chatbot Demo Animation](https://media.tenor.com/tS1i-M-1-4gAAAAM/chatbot-chat-bot.gif)
 
 </div>
 

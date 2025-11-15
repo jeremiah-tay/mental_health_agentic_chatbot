@@ -1,5 +1,7 @@
-# Mental Health Agentic Chatbot
+# DSA4213 Natural Language Processing in Data Science
 
+
+### 🌍 Mental Health Multi-Agentic Chatbot 🌍
 An intelligent mental health assistant chatbot built with LangGraph, Streamlit, and FastAPI. The chatbot provides empathetic support, CBT (Cognitive Behavioral Therapy) techniques, appointment booking, and risk assessment capabilities.
 
 ## Features
@@ -46,6 +48,79 @@ mental_health_agentic_chatbot/
 - Supabase account with PostgreSQL and PGVector extension
 - OpenAI API key
 
+## Database Schema
+Our team will be using Supabase to host it online @ [![Supabase](https://img.shields.io/badge/Supabase-Database-green?logo=supabase&style=flat-square)](https://supabase.io/). If you would like to access our Postgres database, please contact us for the login details.
+
+### `rag_text_chunks`
+Stores the raw text chunks extracted from the mental health PDF documents
+
+| Column     | Type     | Description                               |
+|------------|----------|-------------------------------------------|
+| `id`  | INT  | Unique identifier for the text chunk                       |
+| `metadata`     | JSONB      | Stores metadata about the chunk                    |
+| `source`  | VARCHAR  | The original PDF document source (e.g., 'nimh-anxiety.pdf')     |
+| `chunk_number` | INT  | The sequential index of the chunk within its source document           |
+| `content` | VARCHAR     | The raw text content of the chunk                      |
+
+### `documents`
+Stores chunks of 700 tokens with 200-token overlap of PDF Mental Health documents texts and embeddings
+
+| Column     | Type     | Description                               |
+|------------|----------|-------------------------------------------|
+| `id`  | INT  | ID number of chunk                       |
+| `source`     | VARCHAR      | Information on the chunk                    |
+| `content`  | VARCHAR  | Chunk where the text was taken from     |
+| `chunk index` | INT  | X number of chunk           |
+| `embedding` | VARCHAR     | Text                      |
+| `created_at` | TIMESTAMP     | Text                      |
+
+### `risk_classifier_data`
+Stores chunks of 700 tokens with 200-token overlap of PDF Mental Health documents texts and embeddings
+
+| Column     | Type     | Description                               |
+|------------|----------|-------------------------------------------|
+| `id`  | INT  | ID number of chunk                       |
+| `text`     | VARCHAR      | Information on the chunk                    |
+| `label`  | VARCHAR  | Chunk where the text was taken from     |
+
+constraint risk_classifier_data_pkey primary key (id)
+
+
+### `cbt_techniques`
+Stores chunks of 700 tokens with 200-token overlap of PDF Mental Health documents texts and embeddings
+
+| Column     | Type     | Description                               |
+|------------|----------|-------------------------------------------|
+| `technique_name`  | VARCHAR  | ID number of chunk                       |
+| `description`     | VARCHAR      | Information on the chunk                    |
+| `example_phrases`  | VARCHAR  | Chunk where the text was taken from     |
+| `indicators` | VARCHAR  | X number of chunk           |
+| `emotional_states` | VARCHAR     | Text                      |
+| `when_to_use` | VARCHAR     | Text                      |
+| `when_not_to_use` | VARCHAR     | Text                      |
+
+constraint cbt_techniques_pkey
+
+### `conversation_log`
+Stores chunks of 700 tokens with 200-token overlap of PDF Mental Health documents texts and embeddings
+
+| Column     | Type     | Description                               |
+|------------|----------|-------------------------------------------|
+| `id`  | VARCHAR  | ID number of chunk                       |
+| `conversation_id`     | VARCHAR      | Information on the chunk                    |
+| `conversation_turn`  | VARCHAR  | Chunk where the text was taken from     |
+| `human_message` | VARCHAR  | X number of chunk           |
+| `ai_message` | VARCHAR     | Text                      |
+| `tools_called` | VARCHAR     | Text                      |
+| `tools_result` | VARCHAR     | Text                      |
+| `agents_used` | VARCHAR     | Text                      |
+| `conversation_ended` | VARCHAR     | Text                      |
+| `created_at` | VARCHAR     | Text                      |
+| `risk_probability` | VARCHAR     | Text                      |
+
+constraint conversation_log_pkey primary key (id),
+constraint conversation_log_conversation_id_conversation_turn_key unique (conversation_id, conversation_turn)
+  
 ## Setup Instructions
 
 ### 1. Clone the Repository

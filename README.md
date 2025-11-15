@@ -135,6 +135,16 @@ Stores the vector embeddings for each text chunk, enabling RAG similarity search
 | `embedding` | vector     | The vector embedding for the `content`                      |
 | `created_at` | TIMESTAMPTZ     | Timestamp of when the embedding was created                      |
 
+### `new_risk_data`
+
+| Column     | Type     | Description                               |
+|------------|----------|-------------------------------------------|
+| `id`  | INT (PK) | A unique identifier for each text entry                       |
+| `text`     | TEXT      | The raw text content (e.g., a user's post or message)      |
+| `source`  | TEXT  | The origin of the data (e.g., "reddit depression") |
+| `group` | TEXT  | The category or topic the text belongs to (e.g., "anxiety/depression")         |
+| `label` | INT     | The classification label (e.g., 0 for 'not at risk', 1 for 'at risk')   |
+| `len(words)` | INT | The total number of words in the `text` field |
 
 ### `cbt_techniques`
 Stores the profiles for each Cognitive Behavioural Therapy (CBT) technique used by the CBT tool.
@@ -149,8 +159,6 @@ Stores the profiles for each Cognitive Behavioural Therapy (CBT) technique used 
 | `when_to_use` | TEXT     | Specific use cases or scenarios                      |
 | `when_not_to_use` | TEXT     | Contraindications (when this technique is inappropriate)           |
 
-
-constraint cbt_techniques_pkey
 
 ### `conversation_log`
 Stores a detailed log of every conversation turn for analysis and monitoring on the analytics dashboard.

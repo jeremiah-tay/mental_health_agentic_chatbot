@@ -9,8 +9,12 @@
 
 ## Table of Contents
 - [About the Project](#about-the-project)
-  - [Agentic Chatbot in Mental Health] (#agentic-chatbot-in-mental-health)
+  - [Agentic Chatbot in Mental Health](#agentic-chatbot-in-mental-health)
   - [Features](#features)
+  - [Repository Structure](#repository-structure)
+  - [Database Schema](#database-schema)
+- [Setup Instructions](#setup-instructions)
+- [Running the Application](#running-the-application)
 
 # About the Project
 ## Agentic Chatbot in Mental Health
@@ -30,7 +34,6 @@ Most existing chatbots rely on simple keyword detection for risk assessment, cau
 - **Risk Assessment**: Automated detection of crisis situations with appropriate responses
 - **Analytics Dashboard**: Comprehensive conversation analytics and insights
 - **Conversation Logging**: Persistent storage of all interactions in Supabase
-
 
 
 
@@ -134,16 +137,16 @@ CONSTRAINT conversation_log_conversation_id_conversation_turn_key
 UNIQUE (conversation_id, conversation_turn)
 ```
 
-## Setup Instructions
+# Setup Instructions
 
-### 1. Clone the Repository
+## 1. Clone the Repository
 
 ```bash
 git clone <repository-url>
 cd mental_health_agentic_chatbot
 ```
 
-### 2. Create Virtual Environment
+## 2. Create Virtual Environment
 
 ```bash
 python -m venv chatbot_proj
@@ -155,15 +158,15 @@ source venv/bin/activate
 venv\Scripts\activate
 ```
 
-### 3. Install Dependencies
+## 3. Install Dependencies
 
-#### Step 3.1: Install Main Dependencies
+### Step 3.1: Install Main Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-#### Step 3.2: Download Risk Classifier Model
+### Step 3.2: Download Risk Classifier Model
 
 ```bash
 python riskclassifier_v2/download_models.py
@@ -174,7 +177,7 @@ python riskclassifier_v2/download_models.py
 pip install pypdf
 ```
 
-### 4. Environment Variables Setup
+## 4. Environment Variables Setup
 
 In the `.env` file in the project root directory:
 
@@ -187,10 +190,11 @@ ALLOWED_ORIGINS=
 LLM_MODEL=
 OPENAI_EMBEDDING_MODEL=
 ```
+Before running the application, you must set up your environment variables.
+1. Find the file named `.env` in the root of the project.
+2. Copy and paste the the keys in the **appendix section of our group project** into the `.env` file.
+3. You will have to provide your own OpenAI API KEY
 
-Add the following environment variables to `.env`:
-- You will have to use your own OpenAI API KEY
-- The rest of the keys, please refer to the appendix section of our group report.
 ```env
 # OpenAI Configuration
 OPENAI_API_KEY=your_openai_api_key_here
@@ -201,44 +205,32 @@ OPENAI_API_KEY=your_openai_api_key_here
 - **OpenAI API Key**: 
   1. Go to https://platform.openai.com/api-keys
   2. Create a new API key
-  3. Copy and paste into `.env`
+  3. Copy the key and paste it into `OPENAI_API_KEY`.
 
-### 5. Google Calendar Setup
+## 5. Google Calendar Setup
+This is required for the Appointment Booking agent to function.
 
-#### Step 5.1: Create Google Cloud Project
+### Step 5.1: Obtain OAuth 2.0 Credentials
 
-1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Create a new project or select an existing one
-3. Enable the Google Calendar API:
-   - Navigate to "APIs & Services" > "Library"
-   - Search for "Google Calendar API"
-   - Click "Enable"
+1. Go to **appendix section of our Final Group Report**, click on the link that brings you to a Google Drive
+2. Download the credentials JSON file
+3. Save it as `credentials/credential.json` in the project root
 
-#### Step 5.2: Create OAuth 2.0 Credentials
+### Step 5.2: Authenticate
 
-1. Go to "APIs & Services" > "Credentials"
-2. Click "Create Credentials" > "OAuth client ID"
-3. Choose "Desktop app" as the application type
-4. Download the credentials JSON file
-5. Save it as `credentials/credential.json` in the project root
+This final step links your project to your Google Calendar.
+1. Make sure your `credentials/credential.json` file is saved in the correct folder.
+2. Run the authentication script:
+   ```bash
+   python config/auth.py
+   ```
+3. The script will open a browser window for Google authentication.
+4. Log in with the Google Account found in the **appendix section of our Final Group Report**
+5. Once you log in and permission in granted, the script will create a `credentials/token.json` file. This token is what the chatbot uses to securely manage your calendar.
 
-#### Step 5.3: Authenticate
+# Running the Application
 
-Run the authentication script:
-
-```bash
-python config/auth.py
-```
-
-This will:
-- Open a browser window for Google authentication
-- Refer to the appendix section to obtain the username and password for the google account (WHERE SHOULD I BEST PUT THIS)
-- Save the token to `credentials/token.json`
-- Verify the connection
-
-## Running the Application
-
-### Start the Backend Server
+## Start the Backend Server
 
 In the first terminal:
 
@@ -248,7 +240,7 @@ uvicorn backend.api_server:app --reload --host 127.0.0.1 --port 8000
 
 The backend will be available at `http://127.0.0.1:8000`
 
-### Start the Frontend Application
+## Start the Frontend Application
 
 In a second terminal:
 
@@ -258,32 +250,44 @@ streamlit run app/main.py
 
 The frontend will automatically open in your browser at `http://localhost:8501`
 
-### Verify Installation
+## Verify Installation
 
-1. **Backend Health Check**: Visit `http://127.0.0.1:8000` - you should see:
+Once both servers are running, follow these steps to verify:
+
+1.**Check the Backend Terminal Log**
+at the terminal where you ran `uvicorn`. You should see success mssages confirming that all components have loaded.
+
+
+[TO BE EDITED]
+2. **Backend Health Check**: Visit `http://127.0.0.1:8000` - you should see:
    ```json
-   {"message": "✅ LangGraph Backend is running"}
+   {
+    "status": "online",
+    "risk_classifier_status": "✅ Risk classifier loaded successfully",
+    "cbt_tool_status": "Loaded 6 CBT technique profiles from Supabase",
+    "message": "Embedding model loaded and 6 technique embeddings computed. CBT technique selection tool initialized"
+  }
    ```
 
 2. **Frontend**: The Streamlit app should load with the mental health assistant interface
 
 3. **Google Calendar**: Try booking an appointment to verify calendar integration
 
-## Usage
+# Usage
 
-### Basic Chat
+## Basic Chat
 
 1. Open the Streamlit application
 2. Type your message in the input field
 3. The chatbot will respond using appropriate tools and agents
 
-### Booking an Appointment
+## Booking an Appointment
 
-1. Ask to book an appointment (e.g., "Book a session for tomorrow at 2pm")
+1. Click on  (e.g., "Book a session for tomorrow at 2pm")
 2. Provide your name when prompted
 3. The system will create a calendar event
 
-### CBT Techniques
+## CBT Techniques
 
 The chatbot automatically selects appropriate CBT techniques based on your concerns:
 - Cognitive Restructuring
@@ -293,7 +297,7 @@ The chatbot automatically selects appropriate CBT techniques based on your conce
 - Mindfulness
 - Emotion Regulation
 
-### Analytics Dashboard
+## Analytics Dashboard
 
 To view conversation analytics:
 
@@ -307,9 +311,9 @@ This provides insights into:
 - Risk assessment metrics
 - Agent performance
 
-## Troubleshooting
+# Troubleshooting
 
-### Common Issues
+## Common Issues
 
 1. **Import Errors**:
    - Ensure virtual environment is activated
@@ -334,16 +338,16 @@ This provides insights into:
    - Backend: Change port with `--port 8001`
    - Frontend: Streamlit will automatically use next available port
 
-### Debug Mode
+## Debug Mode
 
 Enable debug logging by setting environment variable:
 ```bash
 export PYTHONPATH="${PYTHONPATH}:$(pwd)"
 ```
 
-## Development
+# Development
 
-### Code Structure
+## Code Structure
 
 - **Agents**: LangGraph state machines for conversation orchestration
 - **Tools**: LangChain tools for specific functionalities

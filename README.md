@@ -2,6 +2,10 @@
   
 # DSA4213 Natural Language Processing in Data Science
 
+[![](https://img.shields.io/badge/Python-3.9%2B-blue?logo=python)]()
+[![](https://img.shields.io/badge/Framework-FastAPI-green?logo=fastapi)]()
+[![](https://img.shields.io/badge/Frontend-Streamlit-red?logo=streamlit)]()
+[![](https://img.shields.io/badge/Database-Supabase-brightgreen?logo=supabase)]()
 
 ### 🌍 Mental Health Multi-Agentic Chatbot 🌍
 
@@ -173,10 +177,10 @@ cd mental_health_agentic_chatbot
 python -m venv chatbot_proj
 
 # On macOS/Linux:
-source venv/bin/activate
+source chatbot_proj/bin/activate
 
 # On Windows:
-venv\Scripts\activate
+chatbot_proj\Scripts\activate
 ```
 
 ## 3. Install Dependencies

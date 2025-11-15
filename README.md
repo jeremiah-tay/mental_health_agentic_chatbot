@@ -136,6 +136,7 @@ Stores the vector embeddings for each text chunk, enabling RAG similarity search
 | `created_at` | TIMESTAMPTZ     | Timestamp of when the embedding was created                      |
 
 ### `new_risk_data`
+Stores individual text samples (like user posts), metadata about their origin (source), topics, and pre-assigned risk label.
 
 | Column     | Type     | Description                               |
 |------------|----------|-------------------------------------------|

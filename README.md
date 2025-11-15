@@ -41,8 +41,6 @@
   - [Support](#support)
 - [Group Members](#group-members)
 
-[🔼 Back to Top](#table-of-contents)
-
 # About the Project
 ## Agentic Chatbot in Mental Health
 We built a multi-agent AI mental health assistant using LangGraph, Streamlit, and FastAPI.
@@ -321,7 +319,8 @@ Once both servers are running, follow these steps to verify:
 
 1. Open the Streamlit application
 2. Type your message in the input field
-3. The chatbot will respond using appropriate tools and agents
+3. You can also click on the suggestion question buttons like `What is Cognitive Behavioural Therapy` or `Tell me about Mental Health`
+4. The chatbot will respond using appropriate tools and agents
 
 ## Booking an Appointment
 

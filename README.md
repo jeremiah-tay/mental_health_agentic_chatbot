@@ -1,8 +1,16 @@
+<div align="center">
+  
 # DSA4213 Natural Language Processing in Data Science
 
 
 ### 🌍 Mental Health Multi-Agentic Chatbot 🌍
-An intelligent mental health assistant chatbot built with LangGraph, Streamlit, and FastAPI. The chatbot provides empathetic support, CBT (Cognitive Behavioral Therapy) techniques, appointment booking, and risk assessment capabilities.
+An intelligent mental health assistant built with LangGraph, Streamlit, and FastAPI.
+
+We created this project to address a critical gap in mental health care: a large portion of people struggling with mental health issues do not seek formal help. While many turn to AI chatbots for support, these tools are often failing them in the most critical moments.
+
+Most existing bots rely on simple keyword detection for risk assessment, causing them to underestimate or miss serious suicide risk and offer only generic, unhelpful replies. Our goal was to build a safer, more effective assistant. By using a multi-agent architecture, our chatbot provides real, evidence-based support—like CBT and appointment booking—while a robust risk assessment system works to ensure users in crisis are safely guided toward the professional help they urgently need.
+
+</div>
 
 ## Features
 
@@ -14,7 +22,13 @@ An intelligent mental health assistant chatbot built with LangGraph, Streamlit, 
 - **Analytics Dashboard**: Comprehensive conversation analytics and insights
 - **Conversation Logging**: Persistent storage of all interactions in Supabase
 
-## Project Structure
+## Table of Contents
+
+
+
+
+
+## Repository Structure
 
 ```
 mental_health_agentic_chatbot/
@@ -70,20 +84,9 @@ Stores the vector embeddings for each text chunk, enabling RAG similarity search
 | `id`  | INT (PK) | Unique identifier for the document embedding                       |
 | `source`     | TEXT      | The original document source                    |
 | `content`  | TEXT  | The raw text content of the chunk     |
-| `chunk index` | INT  | The sequential index of the chunk           |
+| `chunk_index` | INT  | The sequential index of the chunk           |
 | `embedding` | vector     | The vector embedding for the `content`                      |
 | `created_at` | TIMESTAMPTZ     | Timestamp of when the embedding was created                      |
-
-### `risk_classifier_data`
-Stores the labeled training data used to fine-tune the Risk Classifier model.
-
-| Column     | Type     | Description                               |
-|------------|----------|-------------------------------------------|
-| `id`  | INT (PK)  | Unique identifier for the training sample                       |
-| `text`     | VARCHAR      | The user input text sample                    |
-| `label`  | VARCHAR  | The classification label (e.g., 1 for at-risk, 0 for not-at-risk).     |
-
-constraint risk_classifier_data_pkey primary key (id)
 
 
 ### `cbt_techniques`
@@ -99,6 +102,7 @@ Stores the profiles for each Cognitive Behavioural Therapy (CBT) technique used 
 | `when_to_use` | TEXT     | Specific use cases or scenarios                      |
 | `when_not_to_use` | TEXT     | Contraindications (when this technique is inappropriate)           |
 
+
 constraint cbt_techniques_pkey
 
 ### `conversation_log`
@@ -106,7 +110,7 @@ Stores a detailed log of every conversation turn for analysis and monitoring on 
 
 | Column     | Type     | Description                               |
 |------------|----------|-------------------------------------------|
-| `id`  | UUID (PK)  | Unique identifier for the log entry                       |
+| `id`  | UUID   | Unique identifier for the log entry                       |
 | `conversation_id`     | UUID      | Identifier linking all turns in a single conversation     |
 | `conversation_turn`  | INT  | The sequence number of the turn in the conversation     |
 | `human_message` | TEXT  | The user's message           |
@@ -117,10 +121,11 @@ Stores a detailed log of every conversation turn for analysis and monitoring on 
 | `conversation_ended` | BOOLEAN     | true if the conversation was terminated (e.g., crisis path)                      |
 | `created_at` | TIMESTAMPTZ     | Timestamp of when the conversation turn occurred                      |
 | `risk_probability` | FLOAT     | The risk score (0.0 to 1.0) for the human_message                      |
+```sql
+CONSTRAINT conversation_log_conversation_id_conversation_turn_key 
+UNIQUE (conversation_id, conversation_turn)
+```
 
-constraint conversation_log_pkey primary key (id)
-constraint conversation_log_conversation_id_conversation_turn_key unique (conversation_id, conversation_turn)
-  
 ## Setup Instructions
 
 ### 1. Clone the Repository

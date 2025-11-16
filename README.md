@@ -257,9 +257,9 @@ This is required for the Appointment Booking agent to function.
 
 ### Step 5.1: Obtain OAuth 2.0 Credentials
 
-1. Go to **appendix section of our Final Group Report**, click on the link that brings you to a Google Drive
-2. Download the credentials JSON file
-3. Save it as `credentials/credential.json` in the project root
+1. Go to **appendix section of our Final Group Report**, click on the link which brings you to a Google Drive
+2. Download the credentials JSON file and store it inside the credentials folder
+3. Ensure that the file follows `credentials/credential.json` in the project root
 
 ### Step 5.2: Authenticate
 

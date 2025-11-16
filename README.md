@@ -1,6 +1,6 @@
 <div align="center">
-  
-# DSA4213 Natural Language Processing in Data Science
+
+# 🤖 Multi-Agentic Mental Health Chatbot 🤖
 
 [![](https://img.shields.io/badge/Python-3.9%2B-blue?logo=python)]()
 [![](https://img.shields.io/badge/Agents-LangGraph-%231C3C3C?logo=langgraph&logoColor=white)]()
@@ -11,7 +11,7 @@
 
 <img src="./images/animation.gif" alt="Chatbot Demo Animation" width="300">
 
-## 🤖 Multi-Agentic Mental Health Chatbot 🤖
+## DSA4213 Natural Language Processing in Data Science
 
 </div>
 

@@ -220,11 +220,6 @@ pip install -r requirements.txt
 python riskclassifier_v2/download_models.py
 ```
 
-**Note**: If you encounter issues with PyPDF2, you may need to install `pypdf` instead:
-```bash
-pip install pypdf
-```
-
 ## 4. Environment Variables Setup
 
 In the `.env` file in the project root directory:

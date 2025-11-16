@@ -11,7 +11,7 @@
 
 <img src="./images/animation.gif" alt="Chatbot Demo Animation" width="300">
 
-## 🤖 Mental Health Multi-Agentic Chatbot 🤖
+## 🤖 Multi-Agentic Mental Health Chatbot 🤖
 
 </div>
 

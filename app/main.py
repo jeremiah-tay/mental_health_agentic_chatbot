@@ -41,7 +41,7 @@ st.markdown("""
         background-color: transparent;
     }
     
-    /* Input field styling - improved for chat input */
+    /* Input field styling */
     .stTextInput > div > div > input {
         border-radius: 25px;
         border: 2px solid #e0e0e0;
@@ -440,3 +440,4 @@ st.markdown("""
     If you are experiencing a mental health crisis, please contact emergency services immediately.</p>
 </div>
 """, unsafe_allow_html=True)
+

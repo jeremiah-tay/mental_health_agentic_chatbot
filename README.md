@@ -261,6 +261,8 @@ This is required for the Appointment Booking agent to function.
 2. Download the credentials JSON file and store it inside the credentials folder
 3. Ensure that the file follows `credentials/credential.json` in the project root
 
+**Note**: We are sharing this credential.json file only to simplify the setup and grading for this academic assignment. We recognize this is a **critical security vulnerability**; in a real-world environment, this file must never be shared, and each developer would be required to generate their own credentials.
+
 ### Step 5.2: Authenticate
 
 This final step links your project to your Google Calendar:

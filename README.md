@@ -399,6 +399,6 @@ For issues and questions:
 | Name           | GitHub         | 
 |----------------|-----------------|
 | Jeremiah Tay    | [jeremiah-tay](https://github.com/jeremiah-tay) |
-| Sim Zhi Sherng   | [sim-zhi-sherng](https://github.com/ZhiSherng) |
+| Sim Zhi Sherng   | [ZhiSherng](https://github.com/ZhiSherng) |
 | Wynnona Pheeby | [wynpyy](https://github.com/wynpyy)  | 
-| Rachel Chun | [rachel](https://github.com/Chxlz)  | 
+| Rachel Chun | [Chxlz](https://github.com/Chxlz)  | 

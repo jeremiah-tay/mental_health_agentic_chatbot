@@ -203,6 +203,7 @@ python -m venv chatbot_proj
 source chatbot_proj/bin/activate
 
 # On Windows:
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 chatbot_proj\Scripts\activate
 ```
 

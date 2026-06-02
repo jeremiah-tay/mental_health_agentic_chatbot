@@ -1,6 +1,6 @@
 <div align="center">
-  
-# DSA4213 Natural Language Processing in Data Science
+
+# 🤖 Multi-Agentic Mental Health Chatbot 🤖
 
 [![](https://img.shields.io/badge/Python-3.9%2B-blue?logo=python)]()
 [![](https://img.shields.io/badge/Agents-LangGraph-%231C3C3C?logo=langgraph&logoColor=white)]()
@@ -8,9 +8,10 @@
 [![](https://img.shields.io/badge/Frontend-Streamlit-red?logo=streamlit)]()
 [![](https://img.shields.io/badge/Database-Supabase-brightgreen?logo=supabase)]()
 
-### 🤖 Mental Health Multi-Agentic Chatbot 🤖
 
-![Chatbot Demo Animation](https://app.lottiefiles.com/share/32d3a87c-f097-420f-a56f-01d9ba158ce5)
+<img src="./images/animation.gif" alt="Chatbot Demo Animation" width="300">
+
+## DSA4213 Natural Language Processing in Data Science
 
 </div>
 
@@ -40,15 +41,13 @@
   - [Support](#support)
 - [Group Members](#group-members)
 
-[🔼 Back to Top](#table-of-contents)
-
 # About the Project
 ## Agentic Chatbot in Mental Health
-An intelligent mental health assistant built with LangGraph, Streamlit, and FastAPI.
+We built a multi-agent AI mental health assistant using LangGraph, Streamlit, and FastAPI.
 
-We created this project to address a critical gap in mental health care: a large portion of people struggling with mental health issues do not seek formal help. While many turn to AI chatbots for support, these tools are often failing them in the most critical moments.
+This project aims to address a critical gap in mental healthcare: a large portion of people struggling with mental health issues do not seek formal help. While many turn to AI chatbots for support, these tools are often failing them in the most critical moments.
 
-Most existing chatbots rely on simple keyword detection for risk assessment, causing them to underestimate or miss serious suicide risk and offer only generic, unhelpful replies. Our goal was to build a safer, more effective assistant. By using a multi-agent architecture, our chatbot provides real, evidence-based support—like CBT and appointment booking—while a robust risk assessment system works to ensure users in crisis are safely guided toward the professional help they urgently need.
+Most existing chatbots rely on **simple keyword detection** for risk assessment, causing them to underestimate or miss serious suicide risk and offer only generic, unhelpful replies. Our goal is to **build a safer, more effective assistant**. By using a multi-agent architecture, our chatbot provides real, evidence-based support, like CBT and appointment booking, while a robust risk assessment system works to ensure users in crisis are safely guided toward the professional help they urgently need.
 
 
 ## Features
@@ -69,27 +68,39 @@ Most existing chatbots rely on simple keyword detection for risk assessment, cau
 
 ```
 mental_health_agentic_chatbot/
-├── app/                    # Streamlit frontend application
-│   └── main.py            # Main Streamlit UI
-├── backend/               # FastAPI backend server
-│   ├── api_server.py      # API endpoints
-│   └── utils/             # Backend utilities
-├── agents/                # LangGraph agents
-│   ├── supervisor.py      # Main supervisor agent
-│   └── booking.py         # Booking agent
-├── tools/                 # LangChain tools
-│   ├── cbt_tools.py       # CBT technique selection
-│   ├── rag_tools.py       # RAG retrieval
-│   └── calendar_tools.py  # Google Calendar integration
-├── config/                # Configuration files
-│   └── auth.py            # Google Calendar authentication
-├── conversation_history/   # Conversation logging and analytics
-│   ├── logger.py          # Conversation logging
-│   └── analytics.py       # Analytics dashboard
-├── riskclassifier_v2/     # Risk assessment models (archived)
-├── credentials/           # Google Calendar credentials
-├── pdf/                   # PDF documents for RAG
-└── outputs/               # Generated outputs and logs
+├── app/                             # Streamlit frontend application
+│   └── main.py                      # Main Streamlit UI
+├── backend/                         # FastAPI backend server
+│   ├── api_server.py                # API endpoints
+│   ├── utils/                       # Backend utilities
+│       ├── pdf_loader.py            # Extracting text from PDF
+│       └── supabase_client.py       # Client for logging conversations to Supabase
+├── agents/                          # LangGraph agents
+│   ├── supervisor.py                # Main supervisor agent
+│   └── booking.py                   # Booking agent
+├── tools/                           # LangChain tools
+│   ├── cbt_tools.py                 # CBT technique selection
+│   ├── rag_tools.py                 # RAG retrieval
+│   └── calendar_tools.py            # Google Calendar integration
+├── config/                          # Configuration files
+│   └── auth.py                      # Google Calendar authentication
+├── conversation_history/            # Conversation logging and analytics
+│   ├── logger.py                    # Conversation logging
+│   └── analytics.py                 # Analytics dashboard
+├── risk_classifier/                 # Risk assessment models (archived)
+├── riskclassifier_v2/               # Current Risk assessment models
+├── credentials/                     # Google Calendar credentials
+│   └── README.md                    # Instructions on obtaining Google OAuth credentials
+├── pdf/                             # PDF documents for RAG
+│   └── adhd-2024.pdf                # Example PDF
+├── outputs/                         # Generated outputs and logs
+│   └── rag_log_20251019_180822.json # Example RAG json output
+├── images/                          # Store images and gifs
+│   └── animation.gif                # gif for README
+│── .gitignore                       # Specifies files to ignore
+│── .env                             # Example environment variables
+│── requirements.txt                 # Python dependencies
+├── README.md                        # Project overview and setup instructions
 ```
 
 ## Prerequisites
@@ -125,6 +136,17 @@ Stores the vector embeddings for each text chunk, enabling RAG similarity search
 | `embedding` | vector     | The vector embedding for the `content`                      |
 | `created_at` | TIMESTAMPTZ     | Timestamp of when the embedding was created                      |
 
+### `new_risk_data`
+Stores individual text samples (like user posts), metadata about their origin (source), topics, and pre-assigned risk label.
+
+| Column     | Type     | Description                               |
+|------------|----------|-------------------------------------------|
+| `id`  | INT (PK) | A unique identifier for each text entry                       |
+| `text`     | TEXT      | The raw text content (e.g., a user's post or message)      |
+| `source`  | TEXT  | The origin of the data (e.g., "reddit depression") |
+| `group` | TEXT  | The category or topic the text belongs to (e.g., "anxiety/depression")         |
+| `label` | INT     | The classification label (e.g., 0 for 'not at risk', 1 for 'at risk')   |
+| `len(words)` | INT | The total number of words in the `text` field |
 
 ### `cbt_techniques`
 Stores the profiles for each Cognitive Behavioural Therapy (CBT) technique used by the CBT tool.
@@ -139,8 +161,6 @@ Stores the profiles for each Cognitive Behavioural Therapy (CBT) technique used 
 | `when_to_use` | TEXT     | Specific use cases or scenarios                      |
 | `when_not_to_use` | TEXT     | Contraindications (when this technique is inappropriate)           |
 
-
-constraint cbt_techniques_pkey
 
 ### `conversation_log`
 Stores a detailed log of every conversation turn for analysis and monitoring on the analytics dashboard.
@@ -170,7 +190,7 @@ UNIQUE (conversation_id, conversation_turn)
 ## 1. Clone the Repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/jeremiah-tay/mental_health_agentic_chatbot.git
 cd mental_health_agentic_chatbot
 ```
 
@@ -183,6 +203,7 @@ python -m venv chatbot_proj
 source chatbot_proj/bin/activate
 
 # On Windows:
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 chatbot_proj\Scripts\activate
 ```
 
@@ -198,11 +219,6 @@ pip install -r requirements.txt
 
 ```bash
 python riskclassifier_v2/download_models.py
-```
-
-**Note**: If you encounter issues with PyPDF2, you may need to install `pypdf` instead:
-```bash
-pip install pypdf
 ```
 
 ## 4. Environment Variables Setup
@@ -242,9 +258,11 @@ This is required for the Appointment Booking agent to function.
 
 ### Step 5.1: Obtain OAuth 2.0 Credentials
 
-1. Go to **appendix section of our Final Group Report**, click on the link that brings you to a Google Drive
-2. Download the credentials JSON file
-3. Save it as `credentials/credential.json` in the project root
+1. Go to **appendix section of our Final Group Report**, click on the link which brings you to a Google Drive
+2. Download the credentials JSON file and store it inside the credentials folder
+3. Ensure that the file follows `credentials/credential.json` in the project root
+
+**Note**: We are sharing this credential.json file only to simplify the setup and grading for this academic assignment. We recognize this is a **critical security vulnerability**; in a real-world environment, this file must never be shared, and each developer would be required to generate their own credentials.
 
 ### Step 5.2: Authenticate
 
@@ -339,7 +357,8 @@ Once both servers are running, follow these steps to verify:
 
 1. Open the Streamlit application
 2. Type your message in the input field
-3. The chatbot will respond using appropriate tools and agents
+3. You can also click on the suggestion question buttons like `What is Cognitive Behavioural Therapy` or `Tell me about Mental Health`
+4. The chatbot will respond using appropriate tools and agents
 
 ## Booking an Appointment
 
@@ -413,6 +432,6 @@ For issues and questions:
 | Name           | GitHub         | 
 |----------------|-----------------|
 | Jeremiah Tay    | [jeremiah-tay](https://github.com/jeremiah-tay) |
-| Sim Zhi Sherng   | [sim-zhi-sherng](https://github.com/ZhiSherng) |
+| Sim Zhi Sherng   | [ZhiSherng](https://github.com/ZhiSherng) |
 | Wynnona Pheeby | [wynpyy](https://github.com/wynpyy)  | 
-| Rachel Chun | [rachel](https://github.com/Chxlz)  | 
+| Rachel Chun | [Chxlz](https://github.com/Chxlz)  | 

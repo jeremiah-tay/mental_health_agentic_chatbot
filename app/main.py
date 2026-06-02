@@ -1,4 +1,4 @@
-# app/main1.py
+# app/main.py
 import sys
 import os
 import streamlit as st
@@ -24,6 +24,12 @@ st.markdown("""
         background: linear-gradient(135deg, #f0f9e8 0%, #e8f5e9 25%, #e3f2fd 50%, #e1f5fe 75%, #e0f7fa 100%);
         background-attachment: fixed;
     }
+            
+    /* Make all text black */
+    .stApp, .stApp p, .stApp span, .stApp div, .stChatMessage p, .stMarkdown, .stTextInput, .stButton > button {
+        color: #000000;
+    }
+
     
     /* Hide default Streamlit elements */
     #MainMenu {visibility: hidden;}
@@ -35,7 +41,7 @@ st.markdown("""
         background-color: transparent;
     }
     
-    /* Input field styling - improved for chat input */
+    /* Input field styling */
     .stTextInput > div > div > input {
         border-radius: 25px;
         border: 2px solid #e0e0e0;
@@ -44,6 +50,8 @@ st.markdown("""
         background: white;
         height: 48px;
         box-sizing: border-box;
+        color: #000000 !important;
+        caret-color: #000000 !important;
     }
     
     .stTextInput > div > div > input:focus {
@@ -114,13 +122,29 @@ st.markdown("""
         transform: translateY(-2px);
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
+    ###########################################
     
     /* Suggested prompt buttons - smaller size */
     button[key^="prompt_"] {
         font-size: 0.75rem !important;
         padding: 0.4rem 0.8rem !important;
         min-height: auto !important;
+        color: white !important;
+        background: linear-gradient(135deg, #81c784 0%, #4caf50 100%) !important;
+        border-radius: 20px;
+        border: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
     }
+
+    /* Hover effect for suggested prompt buttons */
+    button[key^="prompt_"]:hover {
+        color: red !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
+    }
+    
+    ##################################
     
     /* Title styling */
     .main-title {
@@ -416,3 +440,4 @@ st.markdown("""
     If you are experiencing a mental health crisis, please contact emergency services immediately.</p>
 </div>
 """, unsafe_allow_html=True)
+

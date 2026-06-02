@@ -57,3 +57,6 @@ gdown>=4.0.0
 
 # Streamlit dependencies
 streamlit>=1.25.0
+
+# Amazon Bedrock AgentCore Runtime
+bedrock-agentcore>=1.6.3

@@ -262,6 +262,36 @@ This final step links your project to your Google Calendar:
 
 # Running the Application
 
+## Deploy with Amazon Bedrock AgentCore Runtime
+
+The supervisor agent is exposed for AgentCore via `agentcore_main.py` using `BedrockAgentCoreApp` and `@app.entrypoint`.
+
+**Local AgentCore server** (listens on port 8080 by default):
+
+```bash
+pip install bedrock-agentcore
+python agentcore_main.py
+```
+
+**Test an invocation:**
+
+```bash
+curl -X POST http://localhost:8080/invocations \
+  -H "Content-Type: application/json" \
+  -d '{"prompt": "I feel anxious today", "conversation_id": "test-session-001"}'
+```
+
+**Deploy to AWS** (requires [AgentCore CLI](https://aws.github.io/bedrock-agentcore-starter-toolkit/) and AWS credentials):
+
+```bash
+npm install -g @aws/agentcore
+agentcore configure --entrypoint agentcore_main.py
+agentcore deploy
+agentcore invoke '{"prompt": "Hello"}'
+```
+
+The entrypoint accepts `prompt` or `message`, optional `history` (`[{role, content}, ...]`), and optional `conversation_id`. Responses match the FastAPI `/chat` shape (`response`, `risk_probability`, `tools_called`, etc.).
+
 ## Start the Backend Server
 
 In the first terminal:

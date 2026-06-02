@@ -298,7 +298,7 @@ if prompt:
         with st.spinner("Thinking..."):
             try:
                 response = requests.post(
-                    "http://127.0.0.1:8000/chat",
+                    "http://localhost:8080/invocations",
                     json={
                         "message": prompt,
                         "history": history,

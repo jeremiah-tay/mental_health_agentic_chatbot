@@ -1,0 +1,17 @@
+{
+  "targets": {
+    "default": {
+      "resources": {
+        "runtimes": {
+          "mental_health_supervisor": {
+            "runtimeId": "mentalhealthchatbot_mental_health_supervisor-l97wqrGeIg",
+            "runtimeArn": "arn:aws:bedrock-agentcore:ap-southeast-1:423623841916:runtime/mentalhealthchatbot_mental_health_supervisor-l97wqrGeIg",
+            "roleArn": "arn:aws:iam::423623841916:role/AgentCore-mentalhealthcha-ApplicationAgentMentalHea-xuC9isu1d7K5"
+          }
+        },
+        "stackName": "AgentCore-mentalhealthchatbot-default",
+        "deployHash": "3393b287d334a5d3"
+      }
+    }
+  }
+}

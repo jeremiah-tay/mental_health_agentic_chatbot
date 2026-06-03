@@ -20,21 +20,24 @@ from langgraph.prebuilt import ToolNode
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 load_dotenv()
 
-# Import the safety check
-from riskclassifier_v2.safetycheck import SafetyCheck
 from riskclassifier_v2.crisis_response import CrisisResponse
 
-# Import the risk classifier
-try:
-    risk_classifier = SafetyCheck(base_dir="riskclassifier_v2/saved_models")
-    print("✅ Risk classifier loaded successfully")
-except FileNotFoundError as e:
-    print(f"⚠️ Risk classifier models not found: {e}")
-    print("⚠️ Running without risk assessment - models need to be downloaded")
-    risk_classifier = None
-except Exception as e:
-    print(f"⚠️ Risk classifier failed to load: {e}")
-    risk_classifier = None
+# Local torch/transformers risk models are opt-in (off in slim AgentCore images).
+risk_classifier = None
+_enable_local_risk = os.getenv("AGENTCORE_ENABLE_LOCAL_RISK", "").lower() in ("1", "true", "yes")
+if _enable_local_risk:
+    try:
+        from riskclassifier_v2.safetycheck import SafetyCheck
+
+        risk_classifier = SafetyCheck(base_dir="riskclassifier_v2/saved_models")
+        print("✅ Risk classifier loaded successfully")
+    except FileNotFoundError as e:
+        print(f"⚠️ Risk classifier models not found: {e}")
+        print("⚠️ Running without risk assessment - models need to be downloaded")
+    except Exception as e:
+        print(f"⚠️ Risk classifier failed to load: {e}")
+else:
+    print("ℹ️ Local risk classifier disabled (set AGENTCORE_ENABLE_LOCAL_RISK=1 to enable)")
 
 # Import your actual calendar tools
 from tools.calendar_tools import (

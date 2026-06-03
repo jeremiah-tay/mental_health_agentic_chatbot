@@ -14,6 +14,14 @@ token.json
 
 # Ignore macOS system files
 .DS_Store
+.gitignore
+.np
+.dockerignore
+.cdkignore
+.npmignore
+.cursorignore
+.cursorindexingignore
+.cursorignore
 
 # Distribution / packaging
 .Python
@@ -148,15 +156,22 @@ rag_log*.json
 rag_results*.csv
 ._saved_models*
 
-# Risk classifier outputs
+# Risk classifier outputs and downloaded weights
 saved_models/
+riskclassifier_v2/saved_models/
+riskclassifier_v2/saved_models.zip
+risk_classifier/saved_models/
+*.safetensors
 
 # Booking agent outputs
 booking_agent_log*.json
 booking_agent_results*.csv
 ._booking_agent_saved_models/
 
-# Environments
+# Environments and secrets (never commit API keys or DB URLs)
+.env
+.env.*
+!.env.example
 .envrc
 .venv
 env/
@@ -226,4 +241,41 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+# Google Calendar OAuth and AWS credential exports
 credentials/credential.json
+credentials/token.json
+credentials/*.csv
+credentials/*.json
+!credentials/README.md
+
+# Amazon Bedrock AgentCore (agentcore/.gitignore covers more inside that folder)
+agentcore/.env.local
+agentcore/.cache/
+agentcore/cdk/cdk.out/
+.cdk-out/
+
+# Duplicate AgentCore scaffold (you deploy from repo-root agentcore/)
+mentalhealthchatbot/agentcore/.cache/
+mentalhealthchatbot/agentcore/.env.local
+mentalhealthchatbot/agentcore/cdk/node_modules/
+mentalhealthchatbot/agentcore/cdk/cdk.out/
+mentalhealthchatbot/agentcore/.cli/
+
+# Docker / CDK local (keep Dockerfile, .dockerignore, requirements-agentcore.txt tracked)
+.cdk.staging/
+
+# AgentCore deploy staging (sources synced by scripts/sync-deploy.sh; keep deploy/Dockerfile tracked)
+deploy/agents/
+deploy/tools/
+deploy/backend/
+deploy/config/
+deploy/conversation_history/
+deploy/riskclassifier_v2/
+deploy/agentcore_main.py
+deploy/__pycache__/
+
+# Editor and OS
+.idea/
+.vscode/
+*.swp
+*~

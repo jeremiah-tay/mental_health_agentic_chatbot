@@ -1,7 +1,6 @@
 import os
+import re
 import numpy as np
-from sentence_transformers import SentenceTransformer
-from sklearn.metrics.pairwise import cosine_similarity
 from supabase import create_client, Client
 from typing import List, Dict, Tuple
 from enum import Enum
@@ -59,7 +58,8 @@ def fetch_technique_profiles():
         print(f"Error fetching technique profiles: {str(e)}")
         raise
 
-TECHNIQUE_PROFILES = fetch_technique_profiles()
+_TECHNIQUE_PROFILES: dict | None = None
+_technique_embeddings: dict | None = None
 
 TECHNIQUE_DISTINCTIONS = {
     "COGNITIVE_RESTRUCTURING vs MINDFULNESS": 
@@ -80,42 +80,103 @@ SAFE_FALLBACK_TECHNIQUES = [
     CBTTechnique.GROUNDING
 ]
 
-print(f"Loaded {len(TECHNIQUE_PROFILES)} CBT technique profiles from Supabase")
+def get_technique_profiles() -> dict:
+    global _TECHNIQUE_PROFILES
+    if _TECHNIQUE_PROFILES is None:
+        _TECHNIQUE_PROFILES = fetch_technique_profiles()
+        print(f"Loaded {len(_TECHNIQUE_PROFILES)} CBT technique profiles from Supabase")
+    return _TECHNIQUE_PROFILES
 
-# --- load embedding model ---
-embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
 
-technique_embeddings = {}
-for technique, profile in TECHNIQUE_PROFILES.items():
-    texts_to_embed = [profile["description"]] + profile["example_phrases"]
-    embeddings = embedding_model.encode(texts_to_embed)
-    technique_embeddings[technique] = np.mean(embeddings, axis=0)
+def _cosine_similarity(a: np.ndarray, b: np.ndarray) -> float:
+    a = np.asarray(a, dtype=np.float64)
+    b = np.asarray(b, dtype=np.float64)
+    denom = np.linalg.norm(a) * np.linalg.norm(b)
+    if denom == 0:
+        return 0.0
+    return float(np.dot(a, b) / denom)
 
-print(f"Embedding model loaded and {len(technique_embeddings)} technique embeddings computed")
 
-# --- embedding-based technique selection ---
+def _embed_texts_openai(texts: List[str]) -> np.ndarray:
+    response = openai_client.embeddings.create(
+        model=os.getenv("OPENAI_EMBEDDING_MODEL", "text-embedding-3-small"),
+        input=texts,
+    )
+    return np.array([item.embedding for item in response.data], dtype=np.float64)
+
+
+def _ensure_technique_embeddings() -> dict:
+    global _technique_embeddings
+    if _technique_embeddings is not None:
+        return _technique_embeddings
+
+    profiles = get_technique_profiles()
+    _technique_embeddings = {}
+    for technique, profile in profiles.items():
+        texts_to_embed = [profile["description"]] + profile["example_phrases"]
+        embeddings = _embed_texts_openai(texts_to_embed)
+        _technique_embeddings[technique] = np.mean(embeddings, axis=0)
+
+    print(f"OpenAI embeddings ready for {len(_technique_embeddings)} CBT techniques")
+    return _technique_embeddings
+
+
+def select_technique_by_llm(user_input: str, top_k: int = 3) -> List[Tuple[CBTTechnique, float]]:
+    """Rank techniques with the chat model when local embedding models are unavailable."""
+    profiles = get_technique_profiles()
+    options = "\n".join(
+        f"- {technique.value}: {profile['description'][:200]}"
+        for technique, profile in profiles.items()
+    )
+    prompt = f"""Given this user concern, rank the {top_k} best-matching CBT techniques.
+
+User: "{user_input}"
+
+Techniques:
+{options}
+
+Respond with exactly {top_k} lines:
+TECHNIQUE: <technique_key>
+SCORE: <0.0-1.0 confidence>
+"""
+    response = openai_client.chat.completions.create(
+        model=os.getenv("OPENAI_CBT_RANK_MODEL", "gpt-4o-mini"),
+        messages=[{"role": "user", "content": prompt}],
+        max_completion_tokens=300,
+    )
+    text = response.choices[0].message.content or ""
+    results: List[Tuple[CBTTechnique, float]] = []
+    current_technique = None
+    for line in text.splitlines():
+        if line.startswith("TECHNIQUE:"):
+            key = line.replace("TECHNIQUE:", "").strip().lower()
+            try:
+                current_technique = CBTTechnique(key)
+            except ValueError:
+                current_technique = None
+        elif line.startswith("SCORE:") and current_technique is not None:
+            match = re.search(r"([0-9]*\.?[0-9]+)", line)
+            score = float(match.group(1)) if match else 0.5
+            results.append((current_technique, score))
+            current_technique = None
+    if results:
+        return results[:top_k]
+    return [(CBTTechnique.MINDFULNESS, 0.5)]
+
+
 def select_technique_by_embedding(user_input: str, top_k: int = 3) -> List[Tuple[CBTTechnique, float]]:
-    """
-    select cbt techniques using semantic similarity
-    returns top_k techniques with confidence scores
-    """
-    user_embedding = embedding_model.encode([user_input])[0]
-    
-    similarities = {}
-    for technique, technique_embedding in technique_embeddings.items():
-        similarity = cosine_similarity(
-            user_embedding.reshape(1, -1),
-            technique_embedding.reshape(1, -1)
-        )[0][0]
-        similarities[technique] = similarity
-    
-    sorted_techniques = sorted(
-        similarities.items(), 
-        key=lambda x: x[1], 
-        reverse=True
-    )[:top_k]
-    
-    return sorted_techniques
+    """Select CBT techniques via OpenAI embeddings (no local torch/sentence-transformers)."""
+    try:
+        technique_embeddings = _ensure_technique_embeddings()
+        user_embedding = _embed_texts_openai([user_input])[0]
+        similarities = {
+            technique: _cosine_similarity(user_embedding, technique_embedding)
+            for technique, technique_embedding in technique_embeddings.items()
+        }
+        return sorted(similarities.items(), key=lambda item: item[1], reverse=True)[:top_k]
+    except Exception as exc:
+        print(f"OpenAI embedding selection failed ({exc}); falling back to LLM ranking")
+        return select_technique_by_llm(user_input, top_k=top_k)
 
 # --- llm-based technique validation ---
 def validate_technique_with_llm(user_input: str, technique: CBTTechnique) -> Tuple[bool, str]:
@@ -123,7 +184,7 @@ def validate_technique_with_llm(user_input: str, technique: CBTTechnique) -> Tup
     use llm to validate if selected technique is appropriate
     returns (is_appropriate, reasoning)
     """
-    profile = TECHNIQUE_PROFILES[technique]
+    profile = get_technique_profiles()[technique]
     
     relevant_distinctions = []
     for comparison, distinction in TECHNIQUE_DISTINCTIONS.items():
@@ -266,7 +327,7 @@ def choose_best_fallback_forced(user_input: str, fallback_techniques: List[CBTTe
     compares mindfulness vs grounding to pick better fit
     """
     options_text = "\n".join([
-        f"- {tech.value.replace('_', ' ').title()}: {TECHNIQUE_PROFILES[tech]['description']}"
+        f"- {tech.value.replace('_', ' ').title()}: {get_technique_profiles()[tech]['description']}"
         for tech in fallback_techniques
     ])
     
@@ -674,8 +735,8 @@ def select_cbt_tool(user_mental_health_concern: str) -> dict:
     
     return {
         "selected_technique": selected_technique.value,
-        "technique_description": TECHNIQUE_PROFILES[selected_technique]['description'],
-        "when_to_use": TECHNIQUE_PROFILES[selected_technique]['when_to_use'],
+        "technique_description": get_technique_profiles()[selected_technique]['description'],
+        "when_to_use": get_technique_profiles()[selected_technique]['when_to_use'],
         "embedding_results": [(tech.value, float(score)) for tech, score in embedding_results],
         "validation_attempts": validation_attempts
     }
